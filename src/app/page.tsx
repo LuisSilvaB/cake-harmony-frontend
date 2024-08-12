@@ -1,9 +1,11 @@
-import Navbar from '@/Components/layout/Navbar';
 import React from 'react'
+import HomeHeader from './home/components/Layout/HomeHeader';
+import HomeBody from './home/components/Layout/HomeBody';
 const Home = () => {
   return (
     <div className="w-full flex flex-1 flex-col items-center">
-      <Navbar />
+      <HomeHeader />
+      <HomeBody />
     </div>
   );
 }
