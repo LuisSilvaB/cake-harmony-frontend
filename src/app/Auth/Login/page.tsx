@@ -29,7 +29,7 @@ const Login = () => {
             <Input type="password" id="password" placeholder="******" />
           </div>
 
-          <Button>Iniciar Sesión</Button>
+          <Button className='w-full gap-2 border bg-white text-black hover:bg-white hover:text-black hover:shadow-lg'>Iniciar Sesión</Button>
 
           <Button className="mt-[10px] w-full gap-2 border bg-white text-black hover:bg-white hover:text-black hover:shadow-lg">
             <FcGoogle className="text-2xl" />
