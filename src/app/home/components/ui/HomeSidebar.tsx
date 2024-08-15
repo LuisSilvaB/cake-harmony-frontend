@@ -1,10 +1,10 @@
-import { Button } from "@/Components/ui";
+import { Button } from "@/components/ui";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTrigger,
-} from "@/Components/ui/sheet";
+} from "@/components/ui/sheet";
 import React from 'react'
 import { BsList } from "react-icons/bs";
 import Link from "next/link";
@@ -34,7 +34,7 @@ const HomeSidebar = (props: Props) => {
                 Contacto
               </li>
               <li className="flex w-full items-start gap-2">
-                <Link href={"/Auth/Login"} className="flex items-center">
+                <Link href={"/auth/login"} className="flex items-center">
                   <Button
                     variant="default"
                     size="xs"
@@ -44,7 +44,7 @@ const HomeSidebar = (props: Props) => {
                     Iniciar Sesión{" "}
                   </Button>
                 </Link>
-                <Link href={"/Auth/Register"}></Link>
+                <Link href={"/auth/register"}></Link>
                 <Button
                   variant="outline"
                   size="xs"

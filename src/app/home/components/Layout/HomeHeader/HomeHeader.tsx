@@ -1,4 +1,4 @@
-import Navbar from '@/Components/layout/Navbar'
+import Navbar from '@/components/layout/Navbar'
 import React from 'react'
 
 const HomeHeader = () => {

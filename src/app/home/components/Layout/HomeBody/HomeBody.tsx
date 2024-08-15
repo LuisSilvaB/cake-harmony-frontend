@@ -3,7 +3,7 @@ import React from 'react'
 import cx from '@/libs/cx'
 import HomeBenefitsCard from '../../ui/HomeBenefitsCard';
 import { poppins } from '@/fonts'
-import { Button } from '@/Components/ui'
+import { Button } from '@/components/ui'
 import { HomeBenefits } from '@/app/home/assets/mock';
 
 import Autoplay from 'embla-carousel-autoplay'
@@ -11,7 +11,7 @@ import {
   Carousel,
   CarouselContent, 
   CarouselItem,
-} from "@/Components/ui/carousel";
+} from "@/components/ui/carousel";
 
 
 const HomeBody = () => {

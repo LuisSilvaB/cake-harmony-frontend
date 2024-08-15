@@ -4,12 +4,11 @@ import {
   gabarito
 } from "@/fonts"
 import cx from '@/libs/cx';
-import { Button, Input, Label } from '@/Components/ui';
+import { Button, Input, Label } from '@/components/ui';
 
 const Login = () => {
   return (
-    <div className="flex w-full flex-1 flex-row justify-center border">
-      <section className="flex-1 border"></section>
+    <div className="flex w-full flex-1 flex-col md:flex-row justify-center border">
       <section className="flex flex-1 items-center justify-center border bg-white">
         <div className="flex h-3/4 w-2/4 justify-center flex-col gap-4">
           <h3
@@ -37,6 +36,7 @@ const Login = () => {
           </Button>
         </div>
       </section>
+      <section className="flex-1 border hidden lg:flex"></section>
     </div>
   );
 }

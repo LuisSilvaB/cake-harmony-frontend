@@ -1,9 +1,10 @@
 'use client'
 import React from 'react'
 import cx from '@/libs/cx';
-import { Button } from '@/Components/ui';
+import { Button } from '@/components/ui';
 import { gabarito } from '@/fonts';
 import { HomeSidebar } from '@/app/home/components/ui';
+import Link from "next/link";
 
 const Navbar = () => {
   return (
@@ -27,7 +28,7 @@ const Navbar = () => {
                 Inicio
               </li>
               <li className="cursor-pointer hover:text-atomic-tangerine-600">
-                beneficios
+                Beneficios
               </li>
               <li className="cursor-pointer hover:text-atomic-tangerine-600">
                 Nosotros
@@ -35,15 +36,18 @@ const Navbar = () => {
               <li className="cursor-pointer hover:text-atomic-tangerine-600">
                 Contacto
               </li>
-              <li className="flex gap-2 pl-5">
-                <Button
-                  variant="default"
-                  size="xs"
-                  className="hover:text-whte border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
-                >
-                  {" "}
-                  Iniciar Sesión{" "}
-                </Button>
+              <li className="flex w-full items-start gap-2">
+                <Link href={"/auth/login"} className="flex items-center">
+                  <Button
+                    variant="default"
+                    size="xs"
+                    className="hover:text-whte border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
+                  >
+                    {" "}
+                    Iniciar Sesión{" "}
+                  </Button>
+                </Link>
+                <Link href={"/Auth/Register"}></Link>
                 <Button
                   variant="outline"
                   size="xs"
