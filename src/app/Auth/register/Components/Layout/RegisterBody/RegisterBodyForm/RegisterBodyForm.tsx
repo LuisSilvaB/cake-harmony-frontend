@@ -1,31 +1,32 @@
-import React, {  useEffect, useState } from 'react';
+'use client'
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useFormContext } from 'react-hook-form';
-import { z } from 'zod';
-import { RegisterSchema } from '@/app/auth/register/schema/register.schema';
+import { useFormContext, SubmitHandler } from 'react-hook-form';
 import { UserType } from '@/app/auth/user/types/user.type';
-import cx from '@/libs/cx';
 import { gabarito } from '@/fonts';
-// Define the type for the form using zod
-type RegisterFormType = z.infer<typeof RegisterSchema>;
+import { Button } from '@/components/ui';
+import cx from '@/libs/cx';
+import Icon from '@/components/ui/icon';
+import { RegisterService } from '@/app/auth/register/services/register.service';
+
+const registerService = new RegisterService();
 
 const RegisterBodyForm: React.FC = () => {
-  const [ imageUrl, setImageUrl ] = useState<string>("");
-
-  function onSubmit(data: RegisterFormType) {
-    console.log(data);
+  const { control, formState: { isValid }, handleSubmit } = useFormContext<Omit<UserType, "id" | "created_at">>() 
+  
+  
+  const onSubmit: SubmitHandler<Omit<UserType, "id" | "created_at">> = async (data) => {
+    try {
+      if (!isValid) return;
+      const userData = await registerService.registerUser(data);
+      console.log(userData);  
+    } catch (error) {
+      console.error('Error during registration:', error);
+    }
   }
 
-  const { control, getValues } = useFormContext<Omit<UserType, "id" | "created_at">>()
-  const {...values} = getValues();
-
-  useEffect(() => {
-    setImageUrl(values.image_url);
-  }, [values.image_url])
-
   return (
-    <form className="flex w-full flex-1 flex-col items-center justify-center gap-4">
+    <form className="flex w-full flex-1 flex-col items-center justify-center gap-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="flex h-3/4 w-2/4 flex-col justify-center gap-4">
         <div>
           <h3
@@ -42,7 +43,7 @@ const RegisterBodyForm: React.FC = () => {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>Nombre</FormLabel>
               <FormControl>
                 <Input
                   value={field.value}
@@ -89,6 +90,11 @@ const RegisterBodyForm: React.FC = () => {
             </FormItem>
           )}
         />
+
+        <Button className="hover:text-whte mt-[10px] flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md">
+          <span>Registrarse</span> 
+          <Icon remixIconClass='ri-cake-3-line' size='lg' />
+        </Button>
       </div>
     </form>
   );

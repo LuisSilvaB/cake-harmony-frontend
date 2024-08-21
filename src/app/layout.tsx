@@ -5,6 +5,9 @@ import cx from "@/libs/cx";
 import AuthContextProvider from "@/context/auth-context";
 import ReduxProvider from "@/redux/redux.provider";
 import { ViewTransitions } from 'next-view-transitions'
+import 'remixicon/fonts/remixicon.css';
+
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
