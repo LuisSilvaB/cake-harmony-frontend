@@ -7,15 +7,16 @@ import { UserService } from '@/app/auth/user/service/user.service';
 import { useRouter } from 'next/navigation'
 import { UserType } from '@/app/auth/user/types/user.type';
 import Cookies from 'js-cookie';
+import { Router } from 'next/router';
 
 const { googleAuthLogin, googleAuthLogout } = new LoginService()
-const { verifyUserOnLocalStorage, getUserById } = new UserService()
+const { verifyUserOnCookies , getUserById } = new UserService()
 
 interface AuthContext {
   handleGoogleLogin: () => void;
   handleGoogleLogout: () => void;
   handleRegisterUser: () => void;
-  handleVerifyUserOnLocalStorage?: () => void;
+  handleVerifyUser?: () => void;
   user: UserType | null;
   userStorage: User | null;
 }
@@ -24,7 +25,7 @@ export const authContext = createContext<AuthContext>({
   handleGoogleLogin: () => {},
   handleGoogleLogout: () => {},
   handleRegisterUser: () => {},
-  handleVerifyUserOnLocalStorage: () => null,
+  handleVerifyUser: () => null,
   user: null,
   userStorage: null,
 })
@@ -32,6 +33,7 @@ export const authContext = createContext<AuthContext>({
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
   const [ userStorage, setUserStorage ] = useState<User | null>(null);
   const [ user, setUser ] = useState<UserType | null>(null); 
+  const router = useRouter();
 
   const handleGoogleLogin = async() => {
     await googleAuthLogin()
@@ -41,25 +43,29 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
     await googleAuthLogout()
   }
 
-  const handleVerifyUserOnLocalStorage = async() => {
-    const data = verifyUserOnLocalStorage()
-    if (!data) return;
-    const user = await getUserById(data.user.id)
-    if (!user?.data) {
-      setUserStorage(data.user);
-      setUser(null);
-    }
-    
+  const handleVerifyUser = async() => {
+    const { sub } = verifyUserOnCookies()
+    if (!sub) return;
+    const user = await getUserById(sub)
+    if (!user?.data) return router.push('/auth/login');
+    Cookies.set("user-auth-id", user.data.id, { expires: 3 });
+    setUser(user.data);
   }
 
-  const authStateChange = () => {
-    supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_OUT") {
+  const authStateChange = async() => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === "SIGNED_IN") {
+        console.log('SIGNED_IN', session);
+        console.log('session', session) 
+        Cookies.set('user-auth-access-token', session?.access_token ?? '', { expires: 3 });
+      }       
+      else if (event === "INITIAL_SESSION"  && !session) {
+        setUser(null);
+        googleAuthLogout()
+      }
+      else if (event === "SIGNED_OUT") {
         setUser(null);
         return
-      }
-      if (event === "SIGNED_IN") {
-        Cookies.set('user-auth-access-token', session?.access_token ?? '', { expires: 3 });
       }
     });
   }
@@ -68,7 +74,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     authStateChange();
-    handleVerifyUserOnLocalStorage();
   }, []);
 
   return (

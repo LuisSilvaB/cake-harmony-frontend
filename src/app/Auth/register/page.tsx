@@ -9,9 +9,13 @@ import { z } from 'zod';
 import RegisterBody from './Components/Layout/RegisterBody';
 import { Form } from '@/components/ui/form';
 import { UserType } from '../user/types/user.type';
+import { useAuth } from '@/hooks/useAuth.hook';
 
 const Register = () => {
-  const [token, setToken] = useState<any | null>(null);
+  const [ token, setToken ] = useState<any | null>(null);
+  const { user } = useAuth()
+
+  console.log('user', user) 
 
   const formMethods = useForm<Omit<UserType, "id" | "created_at">>({
     resolver: zodResolver(RegisterSchema),
@@ -26,6 +30,7 @@ const Register = () => {
 
   useEffect(() => {
     const tokenFromCookie = Cookies.get('user-auth-access-token');
+    console.log('tokenFromCookie', tokenFromCookie)
     if (tokenFromCookie) {
       try {
         const decodedToken = jwtDecode<any>(tokenFromCookie);

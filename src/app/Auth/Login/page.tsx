@@ -7,6 +7,7 @@ import {
 import cx from '@/libs/cx';
 import { Button, Input, Label } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth.hook';
+import Link from 'next/link';
 
 const Login = () => {
   const { handleGoogleLogin } = useAuth();  
@@ -42,6 +43,7 @@ const Login = () => {
             <FcGoogle className="text-2xl" />
             <p>Iniciar Sesión con Google</p>
           </Button>
+          <p>No tienes cuenta? <Link href="/auth/register">Registrate</Link></p>
         </div>
       </section>
       <section className="hidden flex-1 border lg:flex"></section>

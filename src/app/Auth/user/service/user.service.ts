@@ -1,12 +1,18 @@
 import { supabase } from '@/config/config';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
 
 export class UserService {
   constructor() {}
 
-  verifyUserOnLocalStorage() {
-    const data = localStorage.getItem('sb-jmvxuavxrxfaxtdkmibn-auth-token');
-    if (!data) return null;
-    return JSON.parse(data);
+  verifyUserOnCookies() {
+    const UserAuthtoken = Cookies.get('user-auth-access-token');
+    const UserId = Cookies.get('user-auth-id');
+
+    if (!UserAuthtoken && UserId) return { access_token: null, sub: UserId };
+    if (UserAuthtoken && !UserId) return { access_token: UserAuthtoken, sub: null };
+    if (!UserAuthtoken && !UserId) return { access_token: null, sub: null };
+    return { access_token: UserAuthtoken, sub: UserId };
   }
 
   async getUserById( id: string ) {
@@ -18,4 +24,5 @@ export class UserService {
       console.log(error);
     }
   }
+
 }

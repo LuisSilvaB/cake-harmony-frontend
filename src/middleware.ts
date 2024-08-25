@@ -7,12 +7,18 @@ export function middleware(req: NextRequest) {
   const UserAuthtoken = req.cookies.get('user-auth-access-token');
   const UserId = req.cookies.get('user-auth-id');
 
+  console.log('UserAuthtoken', UserAuthtoken);
+  console.log('UserId', UserId);
+
   if (UserAuthtoken && !UserId && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/auth/register', req.url));
   }
-  if (!UserAuthtoken && !UserId && pathname.startsWith('/dashboard')) {
+  else if (!UserAuthtoken && !UserId && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/auth/login', req.url));
   }
+  // else if (UserAuthtoken && UserId) {
+  //   return NextResponse.redirect(new URL('/dashboard', req.url));
+  // }
   return NextResponse.next();
 }
 
