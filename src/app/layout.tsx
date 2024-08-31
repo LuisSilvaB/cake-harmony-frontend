@@ -5,6 +5,7 @@ import cx from "@/libs/cx";
 import AuthContextProvider from "@/context/auth-context";
 import ReduxProvider from "@/redux/redux.provider";
 import { ViewTransitions } from 'next-view-transitions'
+import { Toaster } from "@/components/ui/toaster"
 import 'remixicon/fonts/remixicon.css';
 
 
@@ -24,14 +25,16 @@ export default function RootLayout({
     <ViewTransitions>      
       <html lang="es">
         <body
+          suppressHydrationWarning={true}
           className={cx(
             "flex min-h-screen flex-1 justify-center  bg-gray-100 font-bold text-black",
             inter.className,
           )}
         >
-          <ReduxProvider>
+          {/* <ReduxProvider> */}
             <AuthContextProvider>{children}</AuthContextProvider>
-          </ReduxProvider>
+          {/* </ReduxProvider> */}
+          <Toaster />
         </body>
       </html>
     </ViewTransitions>

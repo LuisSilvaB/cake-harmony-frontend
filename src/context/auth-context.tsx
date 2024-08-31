@@ -1,24 +1,23 @@
 'use client'
 import React, { createContext, useEffect, useState } from 'react'
-import { supabase } from '../config/config';
+
 import { User } from '@supabase/supabase-js';
 import { LoginService } from '../app/auth/login/services/login.service';
 import { UserService } from '@/app/auth/user/service/user.service';
-import { useRouter } from 'next/navigation'
-import { UserType } from '@/app/auth/user/types/user.type';
+import { createSupabaseBrowserClient } from '@/libs/supabase/browser-client';
 import Cookies from 'js-cookie';
-import { Router } from 'next/router';
+import { useRouter } from 'next/navigation';
 
 const { googleAuthLogin, googleAuthLogout } = new LoginService()
-const { verifyUserOnCookies , getUserById } = new UserService()
+
+const supabase = createSupabaseBrowserClient() 
 
 interface AuthContext {
   handleGoogleLogin: () => void;
   handleGoogleLogout: () => void;
   handleRegisterUser: () => void;
   handleVerifyUser?: () => void;
-  user: UserType | null;
-  userStorage: User | null;
+  user: User | null;
 }
 
 export const authContext = createContext<AuthContext>({
@@ -27,53 +26,46 @@ export const authContext = createContext<AuthContext>({
   handleRegisterUser: () => {},
   handleVerifyUser: () => null,
   user: null,
-  userStorage: null,
 })
 
 export const AuthContextProvider = ({ children }: { children: React.ReactNode }) => {
-  const [ userStorage, setUserStorage ] = useState<User | null>(null);
-  const [ user, setUser ] = useState<UserType | null>(null); 
-  const router = useRouter();
+  const [ user, setUser ] = useState<User | null>(null); 
+  const router = useRouter()
 
-  const handleGoogleLogin = async() => {
-    await googleAuthLogin()
-  }
+  const handleGoogleLogin = async () => {
+    await googleAuthLogin();
+  };
 
-  const handleGoogleLogout = async() =>  {
-    await googleAuthLogout()
-  }
+  const handleGoogleLogout = async () => {
+    await googleAuthLogout();
+  };
 
-  const handleVerifyUser = async() => {
-    const { sub } = verifyUserOnCookies()
-    if (!sub) return;
-    const user = await getUserById(sub)
-    if (!user?.data) return router.push('/auth/login');
-    Cookies.set("user-auth-id", user.data.id, { expires: 3 });
-    setUser(user.data);
-  }
+  // const handleVerifyUser = async() => {
+  //   const { access_token, sub } = verifyUserOnCookies();
+  //   if (access_token && sub) {
+  //     setUser(sub);
+  //   }
+  // }
 
   const authStateChange = async() => {
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN") {
-        console.log('SIGNED_IN', session);
-        console.log('session', session) 
-        Cookies.set('user-auth-access-token', session?.access_token ?? '', { expires: 3 });
-      }       
-      else if (event === "INITIAL_SESSION"  && !session) {
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN") return setUser(session?.user ?? null);
+      if (event === "SIGNED_OUT") {
+        router.push("/"); 
+        Cookies.remove("user-auth-access-token");
         setUser(null);
-        googleAuthLogout()
-      }
-      else if (event === "SIGNED_OUT") {
-        setUser(null);
-        return
-      }
-    });
+        return;
+      };
+    })
   }
 
-  const handleRegisterUser = () => {}
+  const handleRegisterUser = () => {
+    
+  }
 
   useEffect(() => {
     authStateChange();
+    
   }, []);
 
   return (
@@ -82,7 +74,6 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       handleGoogleLogout,
       handleRegisterUser,
       user,
-      userStorage,
     }}>
       {children}
     </authContext.Provider>
