@@ -1,11 +1,11 @@
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form';
-import { StoreType } from '../../../types/store.type';
+import { StoreType } from '../../../../types/store.type';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { StoreSchema } from '../../../schema/store.schema';
-import CreateStoreDialogBody from './createStoreDialogBody/createStoreDialogBody';
+import { StoreSchema } from '../../../../schema/store.schema';
+import CreateStoreDialogBody from './storeDialogBody/storeDialogBody';
 
-const CreateStoreDialog = () => {
+const StoreDialog = () => {
 
   const defaultValues = {
     name: "",
@@ -16,6 +16,7 @@ const CreateStoreDialog = () => {
     resolver: zodResolver(StoreSchema),
     defaultValues,
     mode: "all",
+    reValidateMode: "onSubmit",
   });
 
   return (
@@ -25,4 +26,4 @@ const CreateStoreDialog = () => {
   );
 }
 
-export default CreateStoreDialog
+export default StoreDialog

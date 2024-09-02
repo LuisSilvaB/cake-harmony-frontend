@@ -1,6 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
+import StoreReducers from '@/app/dashboard/[storeId]/feature/store.feature'
 export const store = configureStore({
-  reducer: {},
+  reducer: {
+    store: StoreReducers,
+  },
 })
 
 export type RootState = ReturnType<typeof store.getState>

@@ -1,5 +1,5 @@
 export type StoreType = {
-  id: string;
+  id: number;
   name: string;
   description: string;
   created_at: Date;

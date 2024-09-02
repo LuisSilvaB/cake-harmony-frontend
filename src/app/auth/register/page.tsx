@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { RegisterSchema } from './schema/register.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -9,9 +9,7 @@ import useSession from '@/libs/supabase/use-session';
 import { useRouter } from 'next/navigation';
 
 const Register = () => {
-  const router = useRouter()
   const session = useSession()
-
 
   const formMethods = useForm<Omit<UserType, "id" | "created_at">>({
     resolver: zodResolver(RegisterSchema),

@@ -22,18 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>      
+    <ViewTransitions>
       <html lang="es">
         <body
           suppressHydrationWarning={true}
           className={cx(
-            "flex min-h-screen flex-1 justify-center  bg-gray-100 font-bold text-black",
+            "flex min-h-screen flex-1 justify-center bg-gray-100 font-bold text-black",
             inter.className,
           )}
         >
-          {/* <ReduxProvider> */}
+          <ReduxProvider>
             <AuthContextProvider>{children}</AuthContextProvider>
-          {/* </ReduxProvider> */}
+          </ReduxProvider>
           <Toaster />
         </body>
       </html>
