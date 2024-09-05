@@ -23,7 +23,6 @@ const RegisterBodyForm: React.FC = () => {
   const router = useRouter(); 
 
   const onSubmit: SubmitHandler<Omit<UserType, "id" | "created_at">> = async (data) => {
-    console.log("Form invalid");
     try {
       if (!isValid) {
         toast({

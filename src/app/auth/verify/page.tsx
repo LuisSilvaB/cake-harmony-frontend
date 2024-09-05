@@ -8,20 +8,29 @@ import UserService from '../user/service/user.service';
 import useSession from '@/libs/supabase/use-session';
 import { useRouter } from 'next/navigation';
 const { setAuthCokkie, getUserById } = new UserService()
+import { useDispatch } from 'react-redux';
+import { getUserByIdFeature } from '../user/features/user.feature'; 
+import { AppDispatch } from '@/redux/store';
 
 const AuthVerify = () => {
   const router = useRouter();
   const session = useSession()
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     if (!session) return ;
+    const verifyUserV1 = async() => {
+      const user = await dispatch(getUserByIdFeature(session.user.id ?? '')).unwrap();
+      if (!user) return router.push('/auth/register')
+    }
     const verifyUser = async() => {
       const user = await getUserById(session.user.id ?? '');
       if (!user?.data) return router.push('/auth/register');
       setAuthCokkie(session.access_token ?? '');
-      return router.push('/dashboard/0/0');
+      return router.push('/dashboard/store/0/sucursal/0');
     }
     verifyUser();
+    verifyUserV1();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])
 

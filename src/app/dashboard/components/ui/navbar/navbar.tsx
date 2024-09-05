@@ -7,15 +7,16 @@ import { DropdownMenu, DropdownMenuShortcut, DropdownMenuTrigger } from '@/compo
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown'
 import { useAuth } from '@/hooks/useAuth.hook'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui'
-import CreateStoreDialog from '@/app/dashboard/[storeId]/components/ui/dialogs/storeDialog'
+import CreateStoreDialog from '@/app/dashboard/store/[storeId]/components/ui/dialogs/storeDialog'
 
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/redux/store'
-import { getStoresFeature } from '@/app/dashboard/[storeId]/feature/store.feature'
+import { getStoresFeature } from '@/app/dashboard/store/[storeId]/feature/store.feature'
 import { useRouter, useParams } from 'next/navigation'
-import { StoreType } from '@/app/dashboard/[storeId]/types/store.type'
+import { StoreType } from '@/app/dashboard/store/[storeId]/types/store.type'
 import { SelectGroup } from '@radix-ui/react-select'
 import { Loader2Icon } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
 
 const Navbar = () => {
   const { storeId } = useParams();
@@ -25,12 +26,12 @@ const Navbar = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const storesSelector = useSelector((state: RootState) => state.store);
-  const storeLoadingSelector = useSelector((state: RootState) => state.store.loading);  
+  const storeLoadingSelector = useSelector((state: RootState) => state.store.loading);    
 
   const onChangeStore = (e:any) => {
     const store = storesSelector.stores.find((store) => store.name === e)
     setSelectedStore(store);
-    router.push(`/dashboard/${store?.id}/0`);
+    router.push(`/dashboard/store/${store?.id}/sucursal/0`);
   }
 
   useEffect(() => {
@@ -62,10 +63,7 @@ const Navbar = () => {
   return (
     <nav className="h-30 flex h-full max-h-14 w-full items-center justify-between bg-white p-4">
       <div className="flex items-center gap-2">
-        <Select
-          value={selectedStore?.name}
-          onValueChange={onChangeStore}
-        >
+        <Select value={selectedStore?.name} onValueChange={onChangeStore}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona una tienda" />
           </SelectTrigger>
@@ -74,7 +72,8 @@ const Navbar = () => {
               <Loader2Icon className="text-atomic-900 h-5 w-5 animate-spin" />
             ) : null}
             <SelectGroup>
-              {Array.isArray(storesSelector.stores) && storesSelector.stores.length ? (
+              {Array.isArray(storesSelector.stores) &&
+              storesSelector.stores.length ? (
                 storesSelector.stores.map((store) => (
                   <SelectItem
                     key={store.id}
@@ -99,13 +98,15 @@ const Navbar = () => {
 
       <div className="flex items-center gap-2">
         {session?.user?.user_metadata?.avatar_url ? (
-          <img
-            src={session?.user?.user_metadata?.avatar_url}
-            alt="avatar"
-            className="h-8 w-8 rounded-full"
-          />
+          <Avatar>
+            <AvatarImage
+              src={session?.user?.user_metadata?.avatar_url}
+              className="h-8 w-10 rounded-full"
+            />
+            <AvatarFallback>Log</AvatarFallback>
+          </Avatar>
         ) : (
-          <Skeleton className="h-8 w-8" />
+          <Skeleton className="h-8 w-10" />
         )}
 
         <div className="flex w-full flex-col justify-start gap-[2px]">

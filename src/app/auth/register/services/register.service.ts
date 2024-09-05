@@ -45,13 +45,13 @@ export class RegisterService {
         name,
         email,
         password: hashedPassword,
+        ROL_ID: process.env.NEXT_PUBLIC_SUGAR_SOVEREIGN_USER_KEY,
       }).select();
-      
-      if (error) {
-        throw new Error('Error creating user: ' + error.message);
-      }
-      
+
+      if(!user || error) throw new Error('User not created');
+
       return user;
+
     } catch (error) {
       console.error('Error registering user:', error);
       throw error;

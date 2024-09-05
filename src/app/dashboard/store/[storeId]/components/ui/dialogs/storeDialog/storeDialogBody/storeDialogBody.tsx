@@ -1,5 +1,5 @@
-import { createStoreFeature } from '@/app/dashboard/[storeId]/feature/store.feature';
-import { StoreType } from '@/app/dashboard/[storeId]/types/store.type';
+import { createStoreFeature } from '@/app/dashboard/store/[storeId]/feature/store.feature';
+import { StoreType } from '@/app/dashboard/store/[storeId]/types/store.type';
 import { Button, Input, Label } from '@/components/ui';
 import {
   Dialog,

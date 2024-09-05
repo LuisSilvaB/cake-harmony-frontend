@@ -13,7 +13,7 @@ export class UserService {
 
   async getUserById( id: string ) {
     try {
-      const user = supabase.from("USER").select("*").eq("id", id).single(); 
+      const user = await supabase.from("USER").select("*").eq("id", id).single(); 
       if (!user) return null;
       return user;
     } catch (error) {
