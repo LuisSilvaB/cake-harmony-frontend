@@ -1,5 +1,5 @@
-import { createStoreFeature } from '@/app/dashboard/store/[storeId]/feature/store.feature';
-import { StoreType } from '@/app/dashboard/store/[storeId]/types/store.type';
+import { createStoreFeature } from '@/app/dashboard/store/feature/store.feature';
+import { StoreType } from '@/app/dashboard/store/types/store.type';
 import { Button, Input, Label } from '@/components/ui';
 import {
   Dialog,
@@ -83,7 +83,7 @@ const StoreDialogBody = () => {
         <Tooltip>
           <TooltipTrigger
             onClick={toggle.onOpen}
-            className="h-8 w-10 rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
+            className="h-8 min-w-8 rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
           >
             <Icon remixIconClass="ri-add-line" size="xs" color="white" />
           </TooltipTrigger>

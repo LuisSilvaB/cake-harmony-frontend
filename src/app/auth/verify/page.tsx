@@ -27,7 +27,7 @@ const AuthVerify = () => {
       const user = await getUserById(session.user.id ?? '');
       if (!user?.data) return router.push('/auth/register');
       setAuthCokkie(session.access_token ?? '');
-      return router.push('/dashboard/store/0/sucursal/0');
+      return router.push('/dashboard/pointOfSale');
     }
     verifyUser();
     verifyUserV1();

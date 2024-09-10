@@ -129,8 +129,17 @@ const storeFeaturesSlice = createSlice({
   initialState: {
     stores: [] as StoreType[],
     loading: false,
+    selectedStore: null as StoreType | null,
   },
   reducers: {
+    setSelectedStore: (state, action) => {
+      state.selectedStore = action.payload;
+    },
+    resetStates: (state) => {
+      state.stores = [];
+      state.loading = false;
+      state.selectedStore = null;
+    },
   },
   extraReducers: (builder: any) => {
     builder.addCase(createStoreFeature.pending, (state: any) => {
@@ -156,6 +165,6 @@ const storeFeaturesSlice = createSlice({
   },
 });
 
-export const { } = storeFeaturesSlice.actions
+export const { setSelectedStore, resetStates } = storeFeaturesSlice.actions
 
 export default storeFeaturesSlice.reducer

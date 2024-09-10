@@ -53,6 +53,7 @@ export const AuthContextProvider = ({ children }: { children: React.ReactNode })
       if (event === "SIGNED_OUT") {
         router.push("/"); 
         Cookies.remove("user-auth-access-token");
+        Cookies.remove("permissions");
         setUser(null);
         return;
       };

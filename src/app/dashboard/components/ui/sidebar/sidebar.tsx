@@ -2,7 +2,7 @@
 import React from 'react'
 import cx from '@/libs/cx';
 import { gabarito } from '@/fonts';
-import { Label, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Button } from '@/components/ui';
+import { Button } from '@/components/ui';
 import Icon from '@/components/ui/icon';
 import { useAuth } from '@/hooks/useAuth.hook';
 import { useSelector } from 'react-redux';
@@ -30,22 +30,7 @@ const Sidebar = () => {
           <span className="pl-1 text-amber-900">Harmony</span>
         </p>
       </section>
-      <section className="flex w-full flex-col gap-1">
-        <Label className="mb-2 text-sm font-semibold text-gray-500">
-          {" "}
-          Sucursal{" "}
-        </Label>
-        <Select>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Selecciona una sucursal" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="sucursal 1">sucursal 1</SelectItem>
-            <SelectItem value="sucursal 2">sucursal 2</SelectItem>
-            <SelectItem value="sucursal 3">sucursal 3</SelectItem>
-          </SelectContent>
-        </Select>
-      </section>
+      <Separator />
       {/** TODO: Add the permissions */}
       <section className="flex h-full w-full flex-1 flex-col gap-2 overflow-y-auto">
         {sideBarItems.map((item: PermissionType, index: number) => (

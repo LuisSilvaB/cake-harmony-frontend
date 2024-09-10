@@ -1,5 +1,5 @@
-import { StoreSchema } from '@/app/dashboard/store/[storeId]/schema/store.schema';
-import { StoreType } from '@/app/dashboard/store/[storeId]/types/store.type';
+import { StoreSchema } from '@/app/dashboard/store/schema/store.schema';
+import { StoreType } from '@/app/dashboard/store/types/store.type';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Input } from '@/components/ui';
@@ -11,7 +11,7 @@ import { AppDispatch, RootState } from '@/redux/store';
 import useSession from '@/libs/supabase/use-session';
 import useToggle from '@/hooks/useToggle.hook';
 import { toast } from '@/hooks/useToast';
-import { createStoreFeature } from '@/app/dashboard/store/[storeId]/feature/store.feature';
+import { createStoreFeature } from '@/app/dashboard/store/feature/store.feature';
 import { useRouter } from 'next/navigation';
 
 const StoreForm = () => {
