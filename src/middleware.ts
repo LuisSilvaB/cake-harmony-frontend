@@ -16,7 +16,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/auth/register', req.url));
   }
   else if (UserAuthtoken  && pathname.startsWith('/auth')) {
-    return NextResponse.redirect(new URL('/dashboard/store/0/sucursal/0', req.url));
+    return NextResponse.redirect(new URL('/dashboard/pointOfSale', req.url));
   }
   return NextResponse.next();
 }

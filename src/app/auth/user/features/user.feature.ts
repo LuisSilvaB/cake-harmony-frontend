@@ -11,19 +11,10 @@ const supabase = createSupabaseBrowserClient();
 export const getUserByIdFeature = createAsyncThunk(
   "user/getUserById",
   async (id: string, { dispatch, getState }) => {
-    const { data, error } = await supabase.from("USER").select("*").eq("id", id).single();
-    if (error) {
-      toast({
-        title: "Error al obtener el usuario, debe registrarse",
-        description: error.message,
-        variant: "destructive",
-      });
-      return null;
-    }
-    const dataPayload = await dispatch(getPermissionsByUserIdFeature(id));
-    const permissions = dataPayload
-    console.log(permissions) 
-    return data
+      const user = await supabase.from("USER").select("*").eq("id", id).single(); 
+      if (!user) return null;
+      await dispatch(getPermissionsByUserIdFeature(id));
+      return user.data;
   }
 );
 

@@ -80,9 +80,9 @@ const colors: { [key: string]: string } = {
   "atomic-950": "text-atomic-tangerine-950",
 };
 
-const Icon: React.FC<IconProps> = ({ remixIconClass, size = "md", color = "white", ...props }) => {
+const Icon: React.FC<IconProps> = ({ remixIconClass, size = "md", color = "black", ...props }) => {
   return (
-    <div {...props} className="flex items-center justify-center">
+    <div {...props}>
       <i className={`${remixIconClass} ${sizeClasses[size]} ${colors[color]} `} />
     </div>
   );

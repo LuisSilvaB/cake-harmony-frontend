@@ -1,7 +1,7 @@
 export type SubsidiaryType = {
   id: number;
   name: string;
-  store_id: number;
+  STORE_ID: number;
   description: string;
   created_at: Date;
 }

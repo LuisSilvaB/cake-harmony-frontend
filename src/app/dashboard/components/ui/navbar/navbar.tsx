@@ -12,14 +12,18 @@ import CreateStoreDialog from '@/app/dashboard/store/components/ui/dialogs/store
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/redux/store'
 import { getStoresFeature, setSelectedStore } from '@/app/dashboard/store/feature/store.feature'
+import { setSelectedSubsidiary } from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
 import { useRouter, useParams } from 'next/navigation'
 import { StoreType } from '@/app/dashboard/store/types/store.type'
 import { SelectGroup } from '@radix-ui/react-select'
 import { Loader2Icon } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
+import SubsidiaryDialog from '@/app/dashboard/subsidiary/components/ui/dialogs/subsidiaryDialog'
+import { getSubsidiaries } from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
+import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type'
 
 const Navbar = () => {
-  const { storeId } = useParams();
+  const { storeId, subsidiaryId } = useParams(); 
   const { handleGoogleLogout } = useAuth() 
   const session = useSession()
   const router = useRouter();
@@ -27,11 +31,22 @@ const Navbar = () => {
   const storesSelector = useSelector((state: RootState) => state.store);
   const storeLoadingSelector = useSelector((state: RootState) => state.store.loading);    
   const selectedStoreSelector = useSelector((state: RootState) => state.store.selectedStore);
+  const subsidiariesSelector = useSelector((state: RootState) => state.subsidiary);
+  const subsidiaryLoadingSelector = useSelector((state: RootState) => state.subsidiary.loading);
+  const selectedSubsidiarySelector = useSelector((state: RootState) => state.subsidiary.selectedSubsidiary);
 
-  const onChangeStore = (e:any) => {
+  const onChangeStore = async (e:any) => {
     const store = storesSelector.stores.find((store) => store.name === e)
-    setSelectedStore(store);
+    dispatch(setSelectedStore(store));
+    dispatch(setSelectedSubsidiary(null));
+    await dispatch(getSubsidiaries({ storeId: Number(store?.id ?? 0) }));
     router.push(`/dashboard/pointOfSale/store/${store?.id}`);
+  }
+
+  const onChangeSubsidiary = (e:any) => {
+    const subsidiary = subsidiariesSelector.subsidiaries.find((subsidiary) => subsidiary.name === e)
+    dispatch(setSelectedSubsidiary(subsidiary));
+    router.push(`/dashboard/pointOfSale/store/${selectedStoreSelector?.id ?? Number(storeId) ?? 0}/subsidiary/${subsidiary?.id}`);
   }
 
   useEffect(() => {
@@ -42,8 +57,19 @@ const Navbar = () => {
         }));
 
         if(Array.isArray(data.payload) && storeId){
+          
           const store:StoreType = data.payload.find(store => store.id === Number(storeId));
-          setSelectedStore(store);
+          
+          dispatch(setSelectedStore(store));
+          
+          const subsidiaries = await dispatch(getSubsidiaries({ storeId: Number(storeId) }));
+
+          if(Array.isArray(subsidiaries.payload) && subsidiaries.payload.length){
+            const subsidiary: SubsidiaryType = subsidiaries.payload.find(
+              (subsidiary) => subsidiary.id === Number(subsidiaryId),
+            );
+            dispatch(setSelectedSubsidiary(subsidiary));
+          }
         }
       }
     }
@@ -52,18 +78,10 @@ const Navbar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, session?.user?.id, storeId]);
 
-  useEffect(() => {
-    if (storeId && storesSelector.stores.some(store => store.id === Number(storeId))) {
-      const store = storesSelector.stores.find(store => store.id === Number(storeId));
-      setSelectedStore(store);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId]);
-
   return (
     <nav className="h-30 flex h-full max-h-14 w-full items-center justify-between bg-white p-4">
       <div className="flex items-center gap-2">
-        <Select value={selectedStoreSelector?.name} onValueChange={onChangeStore}>
+        <Select value={selectedStoreSelector?.name ? selectedStoreSelector?.name : "" } onValueChange={onChangeStore}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona una tienda" />
           </SelectTrigger>
@@ -95,18 +113,18 @@ const Navbar = () => {
         </Select>
         <CreateStoreDialog />
         <div className="flex items-center gap-2">
-        <Select value={selectedStoreSelector?.name} onValueChange={onChangeStore}>
+        <Select value={selectedSubsidiarySelector?.name ? selectedSubsidiarySelector?.name : "" } onValueChange={onChangeSubsidiary} disabled={subsidiaryLoadingSelector as boolean || subsidiariesSelector.subsidiaries.length === 0}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Selecciona una sucursal" />
           </SelectTrigger>
           <SelectContent>
-            {storeLoadingSelector ? (
+            {subsidiaryLoadingSelector ? (
               <Loader2Icon className="text-atomic-900 h-5 w-5 animate-spin" />
             ) : null}
             <SelectGroup>
-              {Array.isArray(storesSelector.stores) &&
-              storesSelector.stores.length ? (
-                storesSelector.stores.map((store) => (
+              {Array.isArray(subsidiariesSelector.subsidiaries) &&
+              subsidiariesSelector.subsidiaries.length ? (
+                subsidiariesSelector.subsidiaries.map((store) => (
                   <SelectItem
                     key={store.id}
                     value={store?.name ?? ""}
@@ -118,14 +136,14 @@ const Navbar = () => {
                   </SelectItem>
                 ))
               ) : (
-                <SelectItem value="sucursal 1">
+                <SelectItem value="sucursal 1" className='text-xs text-gray-500 font-normal'>
                   No se encontraron sucursales
                 </SelectItem>
               )}
             </SelectGroup>
           </SelectContent>
         </Select>
-        <CreateStoreDialog />
+        <SubsidiaryDialog />
       </div>
 
       </div>

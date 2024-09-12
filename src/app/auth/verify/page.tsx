@@ -20,16 +20,12 @@ const AuthVerify = () => {
   useEffect(() => {
     if (!session) return ;
     const verifyUserV1 = async() => {
-      const user = await dispatch(getUserByIdFeature(session.user.id ?? '')).unwrap();
-      if (!user) return router.push('/auth/register')
-    }
-    const verifyUser = async() => {
-      const user = await getUserById(session.user.id ?? '');
-      if (!user?.data) return router.push('/auth/register');
+      const user = await dispatch(getUserByIdFeature(session.user.id ?? ''));
+      if (!user?.payload) return router.push('/auth/register');
       setAuthCokkie(session.access_token ?? '');
       return router.push('/dashboard/pointOfSale');
     }
-    verifyUser();
+    // verifyUser();
     verifyUserV1();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session])

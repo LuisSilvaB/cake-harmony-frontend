@@ -19,7 +19,7 @@ const Sidebar = () => {
     : [];
   return (
     <div className="flex h-full max-w-10 flex-col items-center justify-start gap-2 border bg-white px-4 lg:max-w-56">
-      <section className="flex h-full max-h-20 w-full items-center justify-start">
+      <section className="flex h-full max-h-14 w-full items-center justify-start">
         <p
           className={cx(
             "text-2xl font-semibold text-atomic-tangerine-300",
