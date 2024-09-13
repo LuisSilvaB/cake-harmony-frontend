@@ -40,13 +40,13 @@ const Navbar = () => {
     dispatch(setSelectedStore(store));
     dispatch(setSelectedSubsidiary(null));
     await dispatch(getSubsidiaries({ storeId: Number(store?.id ?? 0) }));
-    router.push(`/dashboard/pointOfSale/store/${store?.id}`);
+    // router.push(`/dashboard/pointOfSale/store/${store?.id}`);
   }
 
   const onChangeSubsidiary = (e:any) => {
     const subsidiary = subsidiariesSelector.subsidiaries.find((subsidiary) => subsidiary.name === e)
     dispatch(setSelectedSubsidiary(subsidiary));
-    router.push(`/dashboard/pointOfSale/store/${selectedStoreSelector?.id ?? Number(storeId) ?? 0}/subsidiary/${subsidiary?.id}`);
+    // router.push(`/dashboard/pointOfSale/store/${selectedStoreSelector?.id ?? Number(storeId) ?? 0}/subsidiary/${subsidiary?.id}`);
   }
 
   useEffect(() => {

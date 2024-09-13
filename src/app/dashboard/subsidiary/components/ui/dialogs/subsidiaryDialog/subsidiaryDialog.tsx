@@ -15,7 +15,7 @@ const SubsidiaryDialog = () => {
   const defaultValues = {
     name: "",
     description: "",
-    STORE_ID:Number(storeId) ?? storesSelector.selectedStore?.id ?? 0,
+    STORE_ID:Number(storeId) ?? Number(storesSelector.selectedStore?.id) ?? 0,
   }
 
   const formMetods = useForm<Omit<SubsidiaryType, "id" | "created_at">>({

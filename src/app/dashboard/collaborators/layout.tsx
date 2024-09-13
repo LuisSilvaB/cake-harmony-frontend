@@ -1,7 +1,7 @@
+
 import { Suspense } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-
-export default function StoreLayout({ children }: { children: React.ReactNode }) {
+export default function CollaboratorsLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={

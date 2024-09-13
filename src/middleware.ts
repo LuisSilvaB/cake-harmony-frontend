@@ -7,10 +7,10 @@ export function middleware(req: NextRequest) {
   
   const UserAuthtoken = req.cookies.get('user-auth-access-token');
   const permissions = req.cookies.get('permissions');
-  const permissionsData = JSON.parse(permissions?.value ?? '{}');
-  const currentRouteParts = pathname.split('/').filter(Boolean);
+  // const permissionsData = JSON.parse(permissions?.value ?? '[]');
+  // const currentRouteParts = pathname.split('/').filter(Boolean);
   
-  console.log(permissionsData);
+  // console.log(permissionsData);
 
   if (!UserAuthtoken && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/auth/register', req.url));

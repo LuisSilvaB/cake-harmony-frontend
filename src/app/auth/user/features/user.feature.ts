@@ -1,3 +1,4 @@
+'use client'
 import { toast } from "@/hooks/useToast"
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { UserType } from "../types/user.type"
@@ -71,8 +72,8 @@ export const getPermissionsByUserIdFeature = createAsyncThunk(
       return null;
     }
 
-    const permissions = permissionsData?.ROL_PERMISSION?.flatMap(rp => rp.PERMISSION) || [];
-    Cookies.set("permissions", JSON.stringify(permissions));
+    const permissions: PermissionType[] = permissionsData?.ROL_PERMISSION?.flatMap(rp => rp.PERMISSION) || [];
+    localStorage.setItem("permissions", JSON.stringify(permissions));
 
     return {
       rol: {
@@ -95,7 +96,7 @@ const userFeaturesSlice = createSlice({
     isLoadingPermissions: false as boolean,
   },
   reducers: {
-    setPermissions: (state, action: PayloadAction<PermissionType[]>) => {
+    setPermissions: (state, action: any) => {
       state.permissions = action.payload;
     }
   },

@@ -1,3 +1,4 @@
+'use client'
 import { createStoreFeature, getStoresFeature, setSelectedStore } from '@/app/dashboard/store/feature/store.feature';
 import { StoreType } from '@/app/dashboard/store/types/store.type';
 import {
@@ -26,7 +27,7 @@ import { toast } from '@/hooks/useToast';
 import useToggle from '@/hooks/useToggle.hook';
 import useSession from '@/libs/supabase/use-session';
 import { AppDispatch, RootState } from '@/redux/store';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FieldErrors, SubmitHandler, useFormContext } from 'react-hook-form';
 import { FaSpinner } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
@@ -34,6 +35,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2Icon } from 'lucide-react';
 import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
 import { createSubsidiaryFeature } from '@/app/dashboard/subsidiary/feature/subsidiary.feature';
+import { store } from '../../../../../../../../redux/store';
 
 const SubsidiaryDialogBody = () => {
   const { storeId } = useParams();
@@ -41,6 +43,7 @@ const SubsidiaryDialogBody = () => {
   const dispatch = useDispatch<AppDispatch>()
   const session = useSession()
   const toggle = useToggle()  
+  const [storeValue, setStore] = useState<string>("");
   const loadingCreateStore = useSelector<RootState>(state => state.store.loading)
   const storesSelector = useSelector((state: RootState) => state.store);
   const storeLoadingSelector = useSelector((state: RootState) => state.store.loading);    
@@ -117,6 +120,7 @@ const SubsidiaryDialogBody = () => {
   const onChangeStore = (e:any) => {
     const store = storesSelector.stores.find((store) => store.name === e)
     setValue("STORE_ID", store?.id ?? 0);
+    setStore(store?.name ?? "");
   }
 
   return (
@@ -190,10 +194,15 @@ const SubsidiaryDialogBody = () => {
               />
             </div>
             <div className="w-full">
-              <Label className="text-xs font-normal mb-3">Sucursal</Label>
+              <Label className="mb-3 text-xs font-normal">Tienda</Label>
               <Select
-                value={selectedStoreSelector?.name}
+                value={
+                  storesSelector.selectedStore
+                    ? storesSelector.selectedStore.name
+                    : storeValue
+                }
                 onValueChange={onChangeStore}
+                disabled={storesSelector.selectedStore ? true : false}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecciona una tienda" />

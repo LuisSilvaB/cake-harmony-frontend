@@ -13,10 +13,11 @@ import Link from 'next/link';
 
 const Sidebar = () => {
   const { handleGoogleLogout } = useAuth();
-  const permissionsData = useSelector<RootState, PermissionType[]>((state) => state.user.permissions);
+  const permissionsData = useSelector((state:RootState) => state.user.permissions);
   const sideBarItems = Array.isArray(permissionsData)
     ? permissionsData.filter((item: PermissionType) => !item.id_permission_main)
     : [];
+
   return (
     <div className="flex h-full max-w-10 flex-col items-center justify-start gap-2 border bg-white px-4 lg:max-w-56">
       <section className="flex h-full max-h-14 w-full items-center justify-start">
@@ -40,7 +41,7 @@ const Sidebar = () => {
               size="xs"
               variant={"ghost"}
             >
-              <Icon remixIconClass={item.icon} size="xl" color="atomic-400" />
+              <Icon remixIconClass={item?.icon ?? ""} size="xl" color="atomic-400" />
               <span className="text-xs">
                 {item.description[0].toUpperCase() +
                   item.description.substring(1).toLowerCase()}
