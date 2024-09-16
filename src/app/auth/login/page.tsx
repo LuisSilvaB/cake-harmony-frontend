@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import {
   gabarito
 } from "@/fonts"
-import cx from '@/libs/cx';
+import cx from '@/utils/cx';
 import { Button, Input, Label } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth.hook';
 import Link from 'next/link';

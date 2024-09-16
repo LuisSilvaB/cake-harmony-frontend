@@ -1,8 +1,13 @@
-import React from 'react'
+'use client'
+import React, { useEffect } from 'react'
+import TagsBody from './components/layout/tagsBody'
+
 
 const TagsPage = () => {
   return (
-    <div></div>
+    <div className='flex flex-col flex-1 w-full align-center'>
+      <TagsBody />   
+    </div>
   )
 }
 

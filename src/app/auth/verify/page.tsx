@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import cx from '@/libs/cx';
+import cx from '@/utils/cx';
 import { gabarito } from '@/fonts';
 import { SymbolIcon } from '@radix-ui/react-icons';
 import UserService from '../user/service/user.service';

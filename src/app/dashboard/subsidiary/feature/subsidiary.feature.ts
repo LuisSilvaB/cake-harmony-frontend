@@ -117,7 +117,7 @@ const subsidiaryFeaturesSlice = createSlice({
       state.loading = true;
     });
     builder.addCase(createSubsidiaryFeature.fulfilled, (state, action) => {
-      if( Array.isArray(action.payload)) state.subsidiaries.push(action.payload[0]);
+      if( Array.isArray(action.payload)) state.subsidiaries.push(action.payload[0]  );
       state.loading = false;
     })
     builder.addCase(createSubsidiaryFeature.rejected, (state, action) => {

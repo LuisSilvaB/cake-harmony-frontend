@@ -10,7 +10,7 @@ export default function TagsLayout({ children }: { children: React.ReactNode }) 
         </div>
       }
     >
-      <section className="flex w-full">{children}</section>
+      <section className="flex w-full flex-1 bg-white rounded-lg">{children}</section> 
     </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import cx from "@/libs/cx";
+import cx from "@/utils/cx";
 import AuthContextProvider from "@/context/auth-context";
 import ReduxProvider from "@/redux/redux.provider";
 import { ViewTransitions } from 'next-view-transitions'
@@ -27,7 +27,7 @@ export default function RootLayout({
         <body
           suppressHydrationWarning={true}
           className={cx(
-            "flex min-h-screen flex-1 justify-center bg-gray-100 font-bold text-black",
+            "flex min-h-screen max-w-screen flex-1 justify-center bg-gray-100 font-bold text-black",
             inter.className,
           )}
         >

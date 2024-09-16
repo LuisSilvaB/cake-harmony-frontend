@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import cx from '@/libs/cx';
+import cx from '@/utils/cx';
 import { gabarito } from '@/fonts';
 import { Button } from '@/components/ui';
 import Icon from '@/components/ui/icon';
@@ -10,6 +10,7 @@ import { RootState } from '@/redux/store';
 import { PermissionType } from '@/app/auth/user/types/permissions.type';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import { upperLowerCase } from '@/utils/upperLowerCase.util';
 
 const Sidebar = () => {
   const { handleGoogleLogout } = useAuth();
@@ -43,8 +44,9 @@ const Sidebar = () => {
             >
               <Icon remixIconClass={item?.icon ?? ""} size="xl" color="atomic-400" />
               <span className="text-xs">
-                {item.description[0].toUpperCase() +
-                  item.description.substring(1).toLowerCase()}
+                {
+                  upperLowerCase(item.description)
+                }
               </span>
             </Button>
           </Link>

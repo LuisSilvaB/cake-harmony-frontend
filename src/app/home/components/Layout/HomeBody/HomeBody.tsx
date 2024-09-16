@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import cx from '@/libs/cx'
+import cx from '@/utils/cx'
 import HomeBenefitsCard from '../../ui/HomeBenefitsCard';
 import { poppins } from '@/fonts'
 import { Button } from '@/components/ui'

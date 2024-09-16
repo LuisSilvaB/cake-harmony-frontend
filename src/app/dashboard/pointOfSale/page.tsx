@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect } from 'react'
 import { gabarito } from '@/fonts';
-import cx from '@/libs/cx';
+import cx from '@/utils/cx';
 import PosBody from './components/layout/pointOfSaleBody/pointOfSaleBody';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';

@@ -5,7 +5,7 @@ import { useFormContext, SubmitHandler, FieldErrors } from 'react-hook-form';
 import { UserType } from '@/app/auth/user/types/user.type';
 import { gabarito } from '@/fonts';
 import { Button } from '@/components/ui';
-import cx from '@/libs/cx';
+import cx from '@/utils/cx';
 import Icon from '@/components/ui/icon';
 import { RegisterService } from '@/app/auth/register/services/register.service';
 import { Link } from 'next-view-transitions';
