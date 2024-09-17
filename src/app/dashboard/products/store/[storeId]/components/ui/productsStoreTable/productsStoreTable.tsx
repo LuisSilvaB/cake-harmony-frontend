@@ -70,7 +70,7 @@ const ProductsStoreTable = ( { products }: ProductsStoreTableProps) => {
     debugColumns: false,
   })
   return (
-    <table className="table-fixed">  
+    <table className="table-fixed mt-2">  
       <thead>
         {table.getHeaderGroups().map((headerGroups, index) => (
           <tr key={index} className="text-center text-sm uppercase  text-gray-700">
