@@ -1,19 +1,18 @@
+import { ProductType } from '@/app/dashboard/products/types/product.type'
+import { Button } from '@/components/ui'
+import { Badge } from '@/components/ui/badge'
+import Icon from '@/components/ui/icon'
+import { upperLowerCase } from '@/utils/upperLowerCase.util'
+import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table'
+import moment from 'moment'
 import React from 'react'
-import { GlobalProductsTagsType, GlobalProductsType } from '../../../types/global-products.type'
-import { createColumnHelper, flexRender, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { upperLowerCase } from '@/utils/upperLowerCase.util';
-import moment from 'moment';
-import { Button } from '@/components/ui';
-import Icon from '@/components/ui/icon';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-type GlobalProductsTableProps = {
-  globalProducts: GlobalProductsType[]
+type ProductsStoreTableProps = {
+  products: ProductType[]
 }
 
-const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
-  const columnHelper = createColumnHelper<GlobalProductsType>()
+const ProductsStoreTable = ( { products }: ProductsStoreTableProps) => {
+  const columnHelper = createColumnHelper<ProductType>()
   const columns = [
     columnHelper.accessor("id", {
       header: "ID",
@@ -40,59 +39,6 @@ const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
       header: "Marca",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor("GLOBAL_PRODUCTS_TAG", {
-      header: "CATEGORÍA",
-      cell: (info) => (
-        <div>
-          {info.getValue().map((tag: GlobalProductsTagsType, index: number) => (
-            <div key={index}>
-              {tag.type === "CATEGORY" ? (
-                <Badge
-                  style={{
-                    backgroundColor: tag.TAG.color,
-                  }}
-                >
-                  {tag.TAG.name}
-                </Badge>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("GLOBAL_PRODUCTS_TAG", {
-      header: "SUB CATEGORÍAS",
-      cell: (info) => (
-        <div>
-          {info.getValue().map((tag: GlobalProductsTagsType, index: number) => (
-            <div key={index}>
-              {tag.type === "SUB CATEGORY" ? (
-                <Badge
-                  style={{
-                    backgroundColor: tag.TAG.color,
-                  }}
-                >
-                  {tag.TAG.name}
-                </Badge>
-              ) : null}
-            </div>
-          ))}
-        </div>
-      ),
-    }),
-    columnHelper.accessor("image_url", {
-      header: "Imágenes",
-      cell: (info) => (
-        <div className="flex w-full flex-row items-center justify-center gap-4">
-          {info.getValue().map((url: string, index: number) => (
-            <Avatar key={index}>
-              <AvatarImage src={url} alt="product img" />
-              <AvatarFallback>PI</AvatarFallback>
-            </Avatar>
-          ))}
-        </div>
-      ),
-    }),
     columnHelper.accessor("created_at", {
       header: "Creado el",
       cell: (info) => moment(info.getValue()).format("DD/MM/YYYY"),
@@ -113,7 +59,7 @@ const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
   ];
 
   const table = useReactTable({
-    data: globalProducts as GlobalProductsType[],
+    data: products as ProductType[],
     columns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(), 
@@ -127,7 +73,7 @@ const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
     <table className="table-fixed">  
       <thead>
         {table.getHeaderGroups().map((headerGroups, index) => (
-          <tr key={index} className="text-center text-sm uppercase text-gray-700">
+          <tr key={index} className="text-center text-sm uppercase  text-gray-700">
             {headerGroups.headers.map((header, index) => (
               <th
                 key={index}
@@ -164,6 +110,6 @@ const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
       </tbody>
     </table>
   );
-};
+}
 
-export default GlobalProductsTable
+export default ProductsStoreTable
