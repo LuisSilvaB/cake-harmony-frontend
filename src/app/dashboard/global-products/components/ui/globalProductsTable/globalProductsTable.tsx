@@ -66,7 +66,7 @@ const GlobalProductsTable = ({ globalProducts }: GlobalProductsTableProps) => {
         <div>
           {info.getValue().map((tag: GlobalProductsTagsType, index: number) => (
             <div key={index}>
-              {tag.type === "SUB CATEGORY" ? (
+              {tag.type === "SUB-CATEGORY" ? (
                 <Badge
                   style={{
                     backgroundColor: tag.TAG.color,

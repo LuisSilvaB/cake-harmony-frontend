@@ -3,6 +3,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { createSupabaseBrowserClient } from '@/libs/supabase/browser-client'
 import { toast } from '@/hooks/useToast'
 import { GlobalProductsType } from '../types/global-products.type'
+import { debounce } from 'lodash';
 
 const supabase = createSupabaseBrowserClient()
 
@@ -24,24 +25,38 @@ export const getAllGlobalProducts = createAsyncThunk(
   }
 )
 
-export const searchGlobalProducts = createAsyncThunk(
+export const onSearchGlobalProducts = createAsyncThunk<GlobalProductsType[], { query: string }>(
   "globalProducts/searchGlobalProducts", 
-  async ({ query }: { query: string }) => {
-    const { data, error } = await supabase
-      .from("GLOBAL_PRODUCTS")
-      .select("*,GLOBAL_PRODUCTS_TAG(*, TAG(*))")
-      .ilike("name", `%${query}%`);
+  async ({ query }) => {
+    let data;
+    let error;
+
+    const trimmedQuery = query.trim(); 
+
+    if (trimmedQuery !== "") {
+      const response = await supabase
+        .from("GLOBAL_PRODUCTS")
+        .select("*,GLOBAL_PRODUCTS_TAG(*, TAG(*))")
+        .ilike("name", `%${trimmedQuery}%`);
+
+      data = response.data;
+      error = response.error;
+    } else {
+      data = [];
+    }
+
     if (error && !data) {
       toast({
         title: "Error",
         description: "Hubo un error al buscar productos globales",
         duration: 2000,
         variant: "destructive"
-      })
+      });
     }
-    return data as GlobalProductsType[] ?? []
+
+    return data as GlobalProductsType[] ?? [];
   }
-)
+);
 
 const globalProductsSlice = createSlice({
   name: "globalProducts", 
@@ -54,6 +69,9 @@ const globalProductsSlice = createSlice({
   reducers: {
     setGlobalProducts: (state, action) => {
       state.globalProducts = action.payload
+    },
+    setSearchGlobalProducts: (state, action) => {
+      state.searchGlobalProducts = action.payload
     }
   }, 
   extraReducers: (builder) => {
@@ -67,19 +85,19 @@ const globalProductsSlice = createSlice({
     builder.addCase(getAllGlobalProducts.rejected, (state, action) => {
       state.loadingGlobalProducts = false
     })  
-    builder.addCase(searchGlobalProducts.pending, (state, action) => {
+    builder.addCase(onSearchGlobalProducts.pending, (state, action) => {
       state.loadingSearchGlobalProducts = true
     })
-    builder.addCase(searchGlobalProducts.fulfilled, (state, action) => {
+    builder.addCase(onSearchGlobalProducts.fulfilled, (state, action) => {
       state.searchGlobalProducts = action.payload
       state.loadingSearchGlobalProducts = false
     })
-    builder.addCase(searchGlobalProducts.rejected, (state, action) => {
+    builder.addCase(onSearchGlobalProducts.rejected, (state, action) => {
       state.loadingSearchGlobalProducts = false
     })
   }
 })
 
-export const { setGlobalProducts } = globalProductsSlice.actions
+export const { setGlobalProducts, setSearchGlobalProducts } = globalProductsSlice.actions
 
 export default globalProductsSlice.reducer

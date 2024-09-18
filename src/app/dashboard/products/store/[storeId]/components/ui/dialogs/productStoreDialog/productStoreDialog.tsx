@@ -3,6 +3,7 @@ import { ProductType } from '@/app/dashboard/products/types/product.type';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form';
+import ProductStoreDialogBody from './productStoreDialogBody';
 
 const ProductStoreDialog = () => {
   const defaultValues = {
@@ -22,7 +23,7 @@ const ProductStoreDialog = () => {
 
   return (
     <FormProvider {...formMetods}>
-      <div>ProductStoreDialog</div>
+      <ProductStoreDialogBody />
     </FormProvider>
   )
 }

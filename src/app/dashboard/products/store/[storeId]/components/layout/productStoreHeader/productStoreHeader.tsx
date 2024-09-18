@@ -1,6 +1,8 @@
+'use client'
 import { Button, Input } from '@/components/ui'
 import Icon from '@/components/ui/icon'
 import React from 'react'
+import ProductStoreDialog from '../../ui/dialogs/productStoreDialog'
 
 const ProductStoreHeader = () => {
   return (
@@ -9,9 +11,7 @@ const ProductStoreHeader = () => {
         <Input placeholder='Buscar por producto' className='w-full text-xs' />
         <Icon remixIconClass='ri-search-line' size='sm' className='absolute right-2 top-1/2 -translate-y-1/2' color='gray' />
       </div>
-      <Button variant="secondary" size="xs" className='' >
-        <Icon remixIconClass='ri-add-line' size='sm' />
-      </Button>
+      <ProductStoreDialog />
     </div>
   )
 }

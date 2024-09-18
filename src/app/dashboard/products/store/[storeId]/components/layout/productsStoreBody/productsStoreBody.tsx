@@ -14,7 +14,6 @@ const ProductsStoreBody = () => {
   const { selectedStore } = useSelector((state: RootState) => state.store)
   useEffect(() => {
     if (selectedStore?.id) {
-      console.log(selectedStore)
       dispatch(
         getAllProductsByStoreId({ storeId: Number(storeId) ?? selectedStore.id }),
       );
