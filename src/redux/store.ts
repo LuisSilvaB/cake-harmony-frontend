@@ -3,8 +3,7 @@ import StoreReducers from '@/app/dashboard/store/feature/store.feature'
 import UserReducers from '@/app/auth/user/features/user.feature'
 import SubsidiaryReducers from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
 import tagsReducers from '@/app/dashboard/tags/feature/tags.feature'
-import globalProductsReducers from '@/app/dashboard/global-products/feature/global-products.feature'
-import productsReducers from '@/app/dashboard/products/feature/product.feature'
+import productsReducers from '@/app/dashboard/products/store/[storeId]/subsidiary/[subsidiaryId]/feature/products.feature'
 
 export const store = configureStore({
   reducer: {
@@ -12,7 +11,6 @@ export const store = configureStore({
     user: UserReducers,
     subsidiary: SubsidiaryReducers,
     tags: tagsReducers,
-    globalProducts: globalProductsReducers,
     products: productsReducers,
   },
 })
