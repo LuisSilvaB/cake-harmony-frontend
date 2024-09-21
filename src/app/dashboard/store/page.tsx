@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { lazy } from 'react'
+import StoreLayout from './layout'
 
-const Store = () => {
+const StoreBody = lazy(() => import('./components/layout/storeBody'))
+
+const StorePage = () => {
   return (
-    <div>page</div>
-  )
+    <StoreLayout>
+      <StoreBody />
+    </StoreLayout>
+  );
 }
 
-export default Store
+export default StorePage
