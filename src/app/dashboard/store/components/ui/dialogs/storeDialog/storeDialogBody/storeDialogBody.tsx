@@ -1,4 +1,4 @@
-import { createStoreFeature } from '@/app/dashboard/store/feature/store.feature';
+import { createStoreFeature, updateStoreFeature } from '@/app/dashboard/store/feature/store.feature';
 import { StoreType } from '@/app/dashboard/store/types/store.type';
 import { Button, Input, Label } from '@/components/ui';
 import {
@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import Icon from '@/components/ui/icon';
@@ -23,12 +22,18 @@ import { FaSpinner } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 
-const StoreDialogBody = () => {
-  const router = useRouter();
+type StoreDialogBodyProps = {
+  store?: StoreType
+}
+
+const StoreDialogBody = ( { store }: StoreDialogBodyProps) => {
   const dispatch = useDispatch<AppDispatch>()
+  const router = useRouter();
   const session = useSession()
   const toggle = useToggle()  
-  const loadingCreateStore = useSelector<RootState>(state => state.store.loading)
+  const { loadingCreateStore, loadingUpdateStore } = useSelector(
+    (state: RootState) => state.store,
+  );
   const {
     control,
     formState: { isValid },
@@ -36,7 +41,7 @@ const StoreDialogBody = () => {
     setValue, 
   } = useFormContext<Omit<StoreType, "id" | "created_at">>(); 
   
-  const onSubmit: SubmitHandler<Omit<StoreType, "id" | "created_at">> = async (data) => {
+  const onSubmitCreate: SubmitHandler<Omit<StoreType, "id" | "created_at">> = async (data) => {
     try {
       if (!isValid || !session?.user) {
         toast({
@@ -52,7 +57,30 @@ const StoreDialogBody = () => {
       if (!store) return;
 
       if (Array.isArray(store.payload)) {
-        router.push(`/dashboard/${store.payload[0].id}/0`)
+        toggle.onClose();
+      };
+      
+    } catch (error) {
+      return; 
+    }
+  }
+
+  const onSubmitUpdate: SubmitHandler<Omit<StoreType, "id" | "created_at">> = async (data) => {
+    try {
+      if (!isValid || !session?.user) {
+        toast({
+          title: "Error",
+          description: "Complete los campos requeridos",
+          duration: 5000,
+        });
+        return
+      }
+      const newStore = await dispatch(
+        updateStoreFeature({ changes: data, storeId: Number(store?.id ?? 0), userId: session.user.id }),
+      );
+      if (!store) return;
+
+      if (Array.isArray(newStore.payload)) {
         toggle.onClose();
       };
       
@@ -72,35 +100,75 @@ const StoreDialogBody = () => {
   }
 
   const onClose = () => {
-    setValue("name", "");
-    setValue("description", "");
     toggle.onClose();
   }
+
+  useEffect(()=>{
+    if(store) {
+      setValue("name", store.name);
+      setValue("description", store.description);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[store])
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onClose}>
       <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger
-            onClick={toggle.onOpen}
-            className="h-8 min-w-8 rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
-          >
-            <Icon remixIconClass="ri-add-line" size="xs" color="white" />
-          </TooltipTrigger>
-          <TooltipContent
-            sideOffset={5}
-            className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
-          >
-            <p className="text-sm">Agregar nueva tienda</p>
-          </TooltipContent>
-        </Tooltip>
+        {store ? (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                onClick={toggle.onOpen}
+                size={"xs"}
+                variant="secondary"
+                className="items-center justify-center rounded-lg"
+              >
+                <Icon remixIconClass="ri-pencil-line" size="md" color="gray" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              sideOffset={5}
+              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
+            >
+              <p className="text-sm">Editar tienda</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                onClick={toggle.onOpen}
+                size={"sm"}
+                className="items-center justify-center rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
+              >
+                <Icon remixIconClass="ri-add-line" size="md" color="white" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              sideOffset={5}
+              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
+            >
+              <p className="text-sm">Agregar nueva tienda</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </TooltipProvider>
       <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <form
+          onSubmit={
+            store
+              ? handleSubmit(onSubmitUpdate, onError)
+              : handleSubmit(onSubmitCreate, onError)
+          }
+        >
           <DialogHeader>
-            <DialogTitle>Agregar una tienda</DialogTitle>
+            <DialogTitle>
+              {store ? "Editar tienda" : "Agregar una tienda"}
+            </DialogTitle>
             <DialogDescription className="text-sm font-normal">
-              Registre los datos correspondientes a la tienda que desea agregar.
+              {store
+                ? "Edite los datos correspondientes a la tienda que desea editar."
+                : "Registre los datos correspondientes a la tienda que desea agregar."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -150,14 +218,14 @@ const StoreDialogBody = () => {
           <DialogFooter>
             <Button
               type="submit"
-              className="hover:text-whte mt-2 flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
+              className="hover:text-whte mt-2 flex flex-row items-center gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
               disabled={loadingCreateStore as boolean}
             >
-              {loadingCreateStore ? (
+              {store ? "Editar tienda" : "Crear tienda"}
+
+              {loadingCreateStore || loadingUpdateStore ? (
                 <FaSpinner className="h-5 w-5 animate-spin text-white" />
-              ) : (
-                "Crear tienda"
-              )}
+              ) : null}
             </Button>
           </DialogFooter>
         </form>

@@ -35,23 +35,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { Loader2Icon } from 'lucide-react';
 import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
 import { createSubsidiaryFeature } from '@/app/dashboard/subsidiary/feature/subsidiary.feature';
-import { store } from '../../../../../../../../redux/store';
 
 const SubsidiaryDialogBody = () => {
-  const { storeId } = useParams();
-  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>()
   const session = useSession()
   const toggle = useToggle()  
-  const [storeValue, setStore] = useState<string>("");
   const loadingCreateStore = useSelector<RootState>(state => state.store.loading)
-  const storesSelector = useSelector((state: RootState) => state.store);
-  const storeLoadingSelector = useSelector((state: RootState) => state.store.loading);    
-  const selectedStoreSelector = useSelector((state: RootState) => state.store.selectedStore);
+  const { loading, stores, selectedStore } = useSelector((state: RootState) => state.store);
 
   useEffect(() => {
     const fetchStores = async () => {
-      if (session?.user?.id && !storesSelector.stores.length) {
+      if (session?.user?.id && !stores.length) {
         const data = await dispatch(getStoresFeature({
           userId: session?.user?.id
         }));
@@ -65,15 +59,16 @@ const SubsidiaryDialogBody = () => {
 
     fetchStores();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, session?.user?.id, storeId]);
+  }, [dispatch, session?.user?.id]);
 
   const {
     control,
     formState: { isValid },
     handleSubmit,
     setValue, 
+    getValues,
   } = useFormContext<Omit<SubsidiaryType, "id" | "created_at">>();
-  
+  const storeId = getValues("STORE_ID");
   const onSubmit: SubmitHandler<Omit<SubsidiaryType, "id" | "created_at">> = async (data) => {
     try {
       if (!isValid || !session?.user) {
@@ -90,9 +85,6 @@ const SubsidiaryDialogBody = () => {
       if (!subsudiary) return;
 
       if (Array.isArray(subsudiary.payload)) {
-        router.push(
-          `/dashboard/pointOfSale/store/${storeId ?? selectedStoreSelector?.id ?? 0}/subsidiary/${subsudiary.payload[0].id}`,
-        ); 
         toggle.onClose();
       };
       
@@ -100,9 +92,8 @@ const SubsidiaryDialogBody = () => {
       return; 
     }
   }
-
+ 
   const onError = (error: FieldErrors<Omit<StoreType, "id" | "created_at">>) => {
-    console.log("Form error:", error);
     toast({
       title: "Vefifique los campos ingresados",
       description: "Error al registrar",
@@ -118,9 +109,9 @@ const SubsidiaryDialogBody = () => {
   }
 
   const onChangeStore = (e:any) => {
-    const store = storesSelector.stores.find((store) => store.name === e)
-    setValue("STORE_ID", store?.id ?? 0);
-    setStore(store?.name ?? "");
+    // const store = stores.find((store) => store.name === e)
+    // setValue("STORE_ID", store?.id ?? 0);
+    // setStore(store?.name ?? "");
   }
 
   return (
@@ -129,6 +120,7 @@ const SubsidiaryDialogBody = () => {
         <Tooltip>
           <TooltipTrigger
             onClick={toggle.onOpen}
+            disabled={loadingCreateStore as boolean || !selectedStore }
             className="h-8 min-w-8 rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
           >
             <Icon remixIconClass="ri-add-line" size="xs" color="white" />
@@ -197,24 +189,24 @@ const SubsidiaryDialogBody = () => {
               <Label className="mb-3 text-xs font-normal">Tienda</Label>
               <Select
                 value={
-                  storesSelector.selectedStore
-                    ? storesSelector.selectedStore.name
-                    : storeValue
+                  selectedStore
+                    ? selectedStore.name
+                    : "selecciona una tienda"
                 }
                 onValueChange={onChangeStore}
-                disabled={storesSelector.selectedStore ? true : false}
+                disabled={selectedStore ? true : false}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecciona una tienda" />
                 </SelectTrigger>
                 <SelectContent>
-                  {storeLoadingSelector ? (
+                  {loading ? (
                     <Loader2Icon className="text-atomic-900 h-5 w-5 animate-spin" />
                   ) : null}
                   <SelectGroup>
-                    {Array.isArray(storesSelector.stores) &&
-                    storesSelector.stores.length ? (
-                      storesSelector.stores.map((store) => (
+                    {Array.isArray(stores) &&
+                    stores.length ? (
+                      stores.map((store) => (
                         <SelectItem
                           key={store.id}
                           value={store?.name ?? ""}

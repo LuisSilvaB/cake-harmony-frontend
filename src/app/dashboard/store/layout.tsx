@@ -10,7 +10,7 @@ export default function StoreLayout({ children }: { children: React.ReactNode })
         </div>
       }
     >
-      <section className="flex w-full flex-1 rounded-lg bg-white p-1">
+      <section className="flex w-full flex-col flex-1 rounded-lg bg-white p-1">
         {children}
       </section>
     </Suspense>

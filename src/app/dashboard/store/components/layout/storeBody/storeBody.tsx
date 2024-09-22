@@ -1,15 +1,14 @@
+'use client'
 import React from 'react'
 import { StoreTable } from '../../ui/tables'
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '@/redux/store'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/redux/store'
 const StoreBody = () => {
-  const dispatch = useDispatch<AppDispatch>() 
-  const user = useSelector((state: RootState) => state.user.user)
-  console.log(user)
+  const stores = useSelector((state: RootState) => state.store.stores)
+
   return (
     <div className='flex w-full flex-col'>
-
-      <StoreTable />
+      <StoreTable stores={stores} />
     </div>
   )
 }

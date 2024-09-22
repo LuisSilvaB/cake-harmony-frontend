@@ -36,51 +36,72 @@ export const getSubsidiaries = createAsyncThunk(
 export const createSubsidiaryFeature = createAsyncThunk(
   "subsidiary/createSubsidiary",
   async (
-    { subsidiaryToCreate }: { subsidiaryToCreate: Omit<SubsidiaryType, "id" | "created_at">  },
+    { subsidiaryToCreate }: { subsidiaryToCreate: Omit<SubsidiaryType, "id" | "created_at"> },
     { dispatch, getState },
   ) => {
     try {
-      const { data:subsidiaryData, error:errorStore } = await supabase.from("SUBSIDIARY").select("*").eq("STORE_ID", subsidiaryToCreate.STORE_ID);
+      let subsidiaryExists = false;
+      const { data: subsidiaryData, error: fetchError } = await supabase
+        .from("SUBSIDIARY")
+        .select("*")
+        .eq("STORE_ID", subsidiaryToCreate.STORE_ID);
 
-      if(!subsidiaryData) return null
-
-      const subsidiaryExists = subsidiaryData.find(
-        (subsidiary: { SUBSIDIARY: any }) => subsidiary.SUBSIDIARY.name === subsidiaryToCreate.name,
-      );
-
-      if(subsidiaryExists) {
+      if (fetchError) {
         toast({
-          title: "Ocurrio un error al crear la sucursal",
-          description: "Ya existe una sucursal con ese nombre registrada",
+          title: "Error al verificar sucursales",
+          description: fetchError.message,
           variant: "destructive",
         });
         return null;
       }
-      const { data, error } = await supabase.from("SUBSIDIARY").insert(subsidiaryToCreate).select();
-      if (error && !data) {
+
+      if (subsidiaryData.length) {
+        subsidiaryExists = subsidiaryData.some(
+          (subsidiary) => subsidiary.name === subsidiaryToCreate.name
+        );
+      }
+
+
+      if (subsidiaryExists) {
         toast({
           title: "Error al crear sucursal",
-          description: error.message,
+          description: "Ya existe una sucursal con ese nombre registrada.",
           variant: "destructive",
         });
-        return;
+        return null;
       }
+      const { data: newSubsidiary, error: insertError } = await supabase
+        .from("SUBSIDIARY")
+        .insert(subsidiaryToCreate)
+        .select();
+
+      if (insertError) {
+        toast({
+          title: "Error al crear sucursal",
+          description: insertError.message,
+          variant: "destructive",
+        });
+        return null;
+      }
+
       toast({
         title: "Sucursal creada",
-        description: "Sucursal creada con éxito",
+        description: "Sucursal creada con éxito.",
         duration: 5000,
         variant: "default",
-      })
-      return data; 
-    }
-    catch (error) {
+      });
+
+      return newSubsidiary; 
+    } catch (error) {
+      console.error("Error al crear la sucursal:", error);
       toast({
-        title: "Error al crear sucursal",
-        description: "Hubo un error al crear la sucursal",
+        title: "Error inesperado",
+        description: "Ocurrió un error inesperado al crear la sucursal.",
         variant: "destructive",
       });
+      return null;
     }
-  },
+  }
 );
 
 
@@ -100,6 +121,9 @@ const subsidiaryFeaturesSlice = createSlice({
     },
     setSelectedSubsidiary: (state, action) => {
       state.selectedSubsidiary = action.payload;
+    },
+    setSubsidiaries: (state, action) => {
+      state.subsidiaries = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -126,6 +150,6 @@ const subsidiaryFeaturesSlice = createSlice({
   }
 });
 
-export const { resetStates, setSelectedSubsidiary } = subsidiaryFeaturesSlice.actions
+export const { resetStates, setSelectedSubsidiary, setSubsidiaries } = subsidiaryFeaturesSlice.actions
 
 export default subsidiaryFeaturesSlice.reducer

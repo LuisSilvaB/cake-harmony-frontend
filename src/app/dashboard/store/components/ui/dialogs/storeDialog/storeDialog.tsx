@@ -5,8 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { StoreSchema } from '../../../../schema/store.schema';
 import CreateStoreDialogBody from './storeDialogBody/storeDialogBody';
 
-const StoreDialog = () => {
-
+type StoreDialogProps = {
+  store?: StoreType
+}
+const StoreDialog = ( { store }: StoreDialogProps) => {
   const defaultValues = {
     name: "",
     description: "",
@@ -21,7 +23,7 @@ const StoreDialog = () => {
 
   return (
     <FormProvider {...formMetods}>
-      <CreateStoreDialogBody />
+      <CreateStoreDialogBody store={store} />
     </FormProvider>
   );
 }

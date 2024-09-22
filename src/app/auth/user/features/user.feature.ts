@@ -98,6 +98,9 @@ const userFeaturesSlice = createSlice({
   reducers: {
     setPermissions: (state, action: any) => {
       state.permissions = action.payload;
+    }, 
+    setUser: (state, action) => {
+      state.user = action.payload;
     }
   },
   extraReducers: (builder) => {
@@ -124,7 +127,7 @@ const userFeaturesSlice = createSlice({
   }
 });
 
-export const { setPermissions } = userFeaturesSlice.actions;
+export const { setPermissions, setUser } = userFeaturesSlice.actions;
 
 export default userFeaturesSlice.reducer;
 

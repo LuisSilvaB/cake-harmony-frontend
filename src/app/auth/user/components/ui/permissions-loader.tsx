@@ -6,7 +6,12 @@ import { gabarito } from '@/fonts';
 import { SymbolIcon } from '@radix-ui/react-icons';
 import { cx } from 'class-variance-authority';
 import { AppDispatch } from '@/redux/store';
-import { setPermissions } from '@/app/auth/user/features/user.feature';
+import { setPermissions, setUser } from '@/app/auth/user/features/user.feature';
+import { UserType } from '../../types/user.type';
+import { setSelectedStore, setStores } from '@/app/dashboard/store/feature/store.feature';
+import { setSelectedSubsidiary, setSubsidiaries } from '@/app/dashboard/subsidiary/feature/subsidiary.feature';
+import { StoreType } from '@/app/dashboard/store/types/store.type';
+import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
 
 const PermissionsLoader = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -14,12 +19,36 @@ const PermissionsLoader = () => {
 
   useEffect(() => {
     const permissions = localStorage.getItem('permissions')
+    const user = localStorage.getItem('user')
+    
     const permissionsData = JSON.parse(permissions ?? '[]')
-    if (permissionsData) {
+    const userData = JSON.parse(user ?? '{}') as UserType
+
+    const selectedStore = localStorage.getItem('selectedStore')
+    const selectedSubsidiary = localStorage.getItem('selectedSubsidiary')
+
+    const store = JSON.parse(selectedStore ?? '{}')
+    const subsidiary = JSON.parse(selectedSubsidiary ?? '{}')
+
+    const storesData  = localStorage.getItem('stores')
+    const subsidiariesData = localStorage.getItem('subsidiaries')
+
+    let stores: StoreType[] = []
+    let subsidiaries: SubsidiaryType[] = []
+
+    if(storesData) {stores = JSON.parse(storesData ?? '[]')}
+    if(subsidiariesData) {subsidiaries = JSON.parse(subsidiariesData ?? '[]')}
+
+    if (permissionsData && userData) {
       setLoader(null)
       dispatch(setPermissions(permissionsData))
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      dispatch(setUser(userData)) }
+      dispatch(setSelectedStore(store));
+      dispatch(setSelectedSubsidiary(subsidiary))
+      dispatch(setStores(stores));
+      dispatch(setSubsidiaries(subsidiaries));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+  
   }, [dispatch]);
 
   return loader;

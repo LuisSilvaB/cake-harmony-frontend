@@ -20,6 +20,7 @@ export class LoginService {
   async googleAuthLogout() {
     try {
       await supabase.auth.signOut();
+      localStorage.clear(); 
     } catch (error) {
       console.error(error);
     }

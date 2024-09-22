@@ -22,6 +22,7 @@ const AuthVerify = () => {
     const verifyUserV1 = async() => {
       const user = await dispatch(getUserByIdFeature(session.user.id ?? ''));
       if (!user?.payload) return router.push('/auth/register');
+      localStorage.setItem('user', JSON.stringify(user.payload));
       setAuthCokkie(session.access_token ?? '');
       return router.push('/dashboard/pointOfSale');
     }
