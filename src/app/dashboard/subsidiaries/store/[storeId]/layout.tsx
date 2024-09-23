@@ -1,7 +1,7 @@
 
 import { Suspense } from "react";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
-export default function SubsidiaryLayout({ children }: { children: React.ReactNode }) {
+export default function SubsidiariesLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -10,7 +10,7 @@ export default function SubsidiaryLayout({ children }: { children: React.ReactNo
         </div>
       }
     >
-      <section className="flex w-full">{children}</section>
+      <section className="flex w-full flex-col flex-1 rounded-lg bg-white p-1">{children}</section>
     </Suspense>
   );
 }

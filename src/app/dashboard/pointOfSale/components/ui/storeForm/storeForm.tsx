@@ -13,6 +13,7 @@ import useToggle from '@/hooks/useToggle.hook';
 import { toast } from '@/hooks/useToast';
 import { createStoreFeature } from '@/app/dashboard/store/feature/store.feature';
 import { useRouter } from 'next/navigation';
+import Icon from '@/components/ui/icon';
 
 const StoreForm = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -71,7 +72,7 @@ const StoreForm = () => {
   return (
     <FormProvider {...formMetods}>
       <form onSubmit={formMetods.handleSubmit(onSubmit, onError)}>
-        <div className="flex flex-col w-full gap-4 py-4">
+        <div className="flex w-full flex-col gap-4 py-4">
           <div className="w-full">
             <FormField
               control={formMetods.control}
@@ -85,7 +86,7 @@ const StoreForm = () => {
                       onChange={field.onChange}
                       type="text"
                       placeholder="Nombre"
-                      className="min-w-56 w-full border"
+                      className="w-full min-w-56 border"
                     />
                   </FormControl>
                   <FormMessage />
@@ -123,7 +124,13 @@ const StoreForm = () => {
             disabled={loadingCreateStore as boolean}
           >
             {loadingCreateStore ? (
-              <FaSpinner className="h-5 w-5 animate-spin text-white" />
+              <div className="animate-spin">
+                <Icon
+                  remixIconClass="ri-loader-4-line"
+                  color="white"
+                  size="xl"
+                />
+              </div>
             ) : (
               "Crear tienda"
             )}

@@ -9,9 +9,9 @@ import { AppDispatch } from '@/redux/store';
 import { setPermissions, setUser } from '@/app/auth/user/features/user.feature';
 import { UserType } from '../../types/user.type';
 import { setSelectedStore, setStores } from '@/app/dashboard/store/feature/store.feature';
-import { setSelectedSubsidiary, setSubsidiaries } from '@/app/dashboard/subsidiary/feature/subsidiary.feature';
+import { setSelectedSubsidiary, setSubsidiaries } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature';
 import { StoreType } from '@/app/dashboard/store/types/store.type';
-import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
+import { SubsidiaryType } from '@/app/dashboard/subsidiaries/store/[storeId]/types/subsidiary.type';
 
 const PermissionsLoader = () => {
   const dispatch = useDispatch<AppDispatch>();

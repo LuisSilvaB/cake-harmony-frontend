@@ -9,17 +9,16 @@ import { useAuth } from '@/hooks/useAuth.hook'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/redux/store'
 import { getStoresFeature, setSelectedStore } from '@/app/dashboard/store/feature/store.feature'
-import { setSelectedSubsidiary } from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
+import { setSelectedSubsidiary } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature'
 import { StoreType } from '@/app/dashboard/store/types/store.type'
 import { Avatar, AvatarFallback, AvatarImage } from '@radix-ui/react-avatar'
-import { getSubsidiaries } from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
-import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type'
+import { getSubsidiaries } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature'
+import { SubsidiaryType } from '@/app/dashboard/subsidiaries/store/[storeId]/types/subsidiary.type'
 import StoreSubsidiaryDialog from '@/app/components/ui/dialogs/storeSubsidiaryDialog'
 
 const Navbar = () => {
   const { handleGoogleLogout } = useAuth() 
   const session = useSession()
-  const storesFromLocalStorage = localStorage.getItem("stores")
   const dispatch = useDispatch<AppDispatch>();
   const { selectedStore, stores, loading: loadingStores } = useSelector((state: RootState) => state.store);
   const selectedSubsidiary = useSelector((state: RootState) => state.subsidiary.selectedSubsidiary);

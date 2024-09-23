@@ -28,7 +28,6 @@ type StoreDialogBodyProps = {
 
 const StoreDialogBody = ( { store }: StoreDialogBodyProps) => {
   const dispatch = useDispatch<AppDispatch>()
-  const router = useRouter();
   const session = useSession()
   const toggle = useToggle()  
   const { loadingCreateStore, loadingUpdateStore } = useSelector(
@@ -107,9 +106,12 @@ const StoreDialogBody = ( { store }: StoreDialogBodyProps) => {
     if(store) {
       setValue("name", store.name);
       setValue("description", store.description);
+    } else {
+      setValue("name", "");
+      setValue("description", "");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[store])
+  },[])
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onClose}>
@@ -224,7 +226,9 @@ const StoreDialogBody = ( { store }: StoreDialogBodyProps) => {
               {store ? "Editar tienda" : "Crear tienda"}
 
               {loadingCreateStore || loadingUpdateStore ? (
-                <FaSpinner className="h-5 w-5 animate-spin text-white" />
+                <div className='animate-spin'>
+                  <Icon remixIconClass='ri-loader-4-line' color='white' size='xl' />
+                </div>
               ) : null}
             </Button>
           </DialogFooter>

@@ -23,10 +23,10 @@ import {
 } from "@/components/ui";
 import Icon from "@/components/ui/icon";
 import { setSelectedStore } from '@/app/dashboard/store/feature/store.feature'
-import { getSubsidiaries, setSelectedSubsidiary } from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
+import { getSubsidiaries, setSelectedSubsidiary } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature'
 import { Loader2Icon } from 'lucide-react'
 import CreateStoreDialog from '@/app/dashboard/store/components/ui/dialogs/storeDialog';
-import SubsidiaryDialog from '@/app/dashboard/subsidiary/components/ui/dialogs/subsidiaryDialog';
+import SubsidiaryDialog from '@/app/dashboard/subsidiaries/store/[storeId]/components/ui/dialogs/subsidiaryDialog';
 
 const StoreSubsidiaryDialog = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -47,7 +47,6 @@ const StoreSubsidiaryDialog = () => {
   const onChangeSubsidiary = (e:any) => {
     const subsidiary = subsidiaries.find((subsidiary) => subsidiary.name === e)
     localStorage.setItem("selectedSubsidiary", JSON.stringify(subsidiary));
-    localStorage.setItem("subsidiaries", JSON.stringify(subsidiaries));
     dispatch(setSelectedSubsidiary(subsidiary));
   }
 

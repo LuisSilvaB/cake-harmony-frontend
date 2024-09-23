@@ -33,16 +33,20 @@ import { FaSpinner } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2Icon } from 'lucide-react';
-import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
-import { createSubsidiaryFeature } from '@/app/dashboard/subsidiary/feature/subsidiary.feature';
+import { SubsidiaryType } from '@/app/dashboard/subsidiaries/store/[storeId]/types/subsidiary.type';
+import { createSubsidiaryFeature, updateSubsidiaryFeature } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature';
 
-const SubsidiaryDialogBody = () => {
+type SubsidiaryDialogBodyProps = {
+  subsidiary?: SubsidiaryType; 
+}
+
+const SubsidiaryDialogBody = ({ subsidiary } : SubsidiaryDialogBodyProps) => {
   const dispatch = useDispatch<AppDispatch>()
   const session = useSession()
   const toggle = useToggle()  
   const loadingCreateStore = useSelector<RootState>(state => state.store.loading)
   const { loading, stores, selectedStore } = useSelector((state: RootState) => state.store);
-
+  const { loadingCreateSubsidiary, loadingUpdateSubsidiary } = useSelector((state: RootState) => state.subsidiary);
   useEffect(() => {
     const fetchStores = async () => {
       if (session?.user?.id && !stores.length) {
@@ -69,7 +73,7 @@ const SubsidiaryDialogBody = () => {
     getValues,
   } = useFormContext<Omit<SubsidiaryType, "id" | "created_at">>();
   const storeId = getValues("STORE_ID");
-  const onSubmit: SubmitHandler<Omit<SubsidiaryType, "id" | "created_at">> = async (data) => {
+  const onCreateSubsidiary: SubmitHandler<Omit<SubsidiaryType, "id" | "created_at">> = async (data) => {
     try {
       if (!isValid || !session?.user) {
         toast({
@@ -92,6 +96,30 @@ const SubsidiaryDialogBody = () => {
       return; 
     }
   }
+
+  const onUpdateSubsidiary: SubmitHandler<Omit<SubsidiaryType, "id" | "created_at">> = async (data) => {
+    try {
+      if (!isValid || !session?.user) {
+        toast({
+          title: "Error",
+          description: "Complete los campos requeridos",
+          duration: 5000,
+        });
+        return
+      }
+      const subsudiary = await dispatch(
+        updateSubsidiaryFeature({ changes: data, subsidiaryId: Number(subsidiary?.id ?? 0) })
+      );
+      if (!subsudiary) return;
+
+      if (Array.isArray(subsudiary.payload)) {
+        toggle.onClose();
+      };
+      
+    } catch (error) {
+      return; 
+    }
+  }
  
   const onError = (error: FieldErrors<Omit<StoreType, "id" | "created_at">>) => {
     toast({
@@ -102,44 +130,75 @@ const SubsidiaryDialogBody = () => {
     });
   }
 
-  const onClose = () => {
-    setValue("name", "");
-    setValue("description", "");
-    toggle.onClose();
-  }
-
-  const onChangeStore = (e:any) => {
-    // const store = stores.find((store) => store.name === e)
-    // setValue("STORE_ID", store?.id ?? 0);
-    // setStore(store?.name ?? "");
-  }
+  useEffect(() => {
+    if (subsidiary) {
+      setValue("name", subsidiary.name);
+      setValue("description", subsidiary.description);
+    }else{
+      setValue("name", "");
+      setValue("description", "");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <Dialog open={toggle.isOpen} onOpenChange={onClose}>
+    <Dialog open={toggle.isOpen} onOpenChange={toggle.onClose}>
       <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger
-            onClick={toggle.onOpen}
-            disabled={loadingCreateStore as boolean || !selectedStore }
-            className="h-8 min-w-8 rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
-          >
-            <Icon remixIconClass="ri-add-line" size="xs" color="white" />
-          </TooltipTrigger>
-          <TooltipContent
-            sideOffset={5}
-            className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
-          >
-            <p className="text-sm">Agregar nueva sucursal</p>
-          </TooltipContent>
-        </Tooltip>
+        {subsidiary ? (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                onClick={toggle.onOpen}
+                size={"xs"}
+                variant="secondary"
+                className="items-center justify-center rounded-lg"
+              >
+                <Icon remixIconClass="ri-pencil-line" size="md" color="gray" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              sideOffset={5}
+              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
+            >
+              <p className="text-sm">Editar tienda</p>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                onClick={toggle.onOpen}
+                size={"sm"}
+                className="items-center justify-center rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
+              >
+                <Icon remixIconClass="ri-add-line" size="md" color="white" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent
+              sideOffset={5}
+              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
+            >
+              <p className="text-sm">Agregar nueva tienda</p>
+            </TooltipContent>
+          </Tooltip>
+        )}
       </TooltipProvider>
       <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
+        <form
+          onSubmit={
+            subsidiary
+              ? handleSubmit(onUpdateSubsidiary, onError)
+              : handleSubmit(onCreateSubsidiary, onError)
+          }
+        >
           <DialogHeader>
-            <DialogTitle>Agregar una sucursal</DialogTitle>
+            <DialogTitle>
+              {subsidiary ? "Editar sucursal" : "Agregar una sucursal"}
+            </DialogTitle>
             <DialogDescription className="text-sm font-normal">
-              Registre los datos correspondientes a la sucursal que desea
-              agregar.
+              {subsidiary
+                ? "Edite los datos correspondientes a la sucursal."
+                : "Registre los datos correspondientes a la sucursal que desea agregar."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -189,11 +248,8 @@ const SubsidiaryDialogBody = () => {
               <Label className="mb-3 text-xs font-normal">Tienda</Label>
               <Select
                 value={
-                  selectedStore
-                    ? selectedStore.name
-                    : "selecciona una tienda"
+                  selectedStore ? selectedStore.name : "selecciona una tienda"
                 }
-                onValueChange={onChangeStore}
                 disabled={selectedStore ? true : false}
               >
                 <SelectTrigger className="w-full">
@@ -204,8 +260,7 @@ const SubsidiaryDialogBody = () => {
                     <Loader2Icon className="text-atomic-900 h-5 w-5 animate-spin" />
                   ) : null}
                   <SelectGroup>
-                    {Array.isArray(stores) &&
-                    stores.length ? (
+                    {Array.isArray(stores) && stores.length ? (
                       stores.map((store) => (
                         <SelectItem
                           key={store.id}
@@ -231,13 +286,20 @@ const SubsidiaryDialogBody = () => {
             <Button
               type="submit"
               className="hover:text-whte mt-2 flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
-              disabled={loadingCreateStore as boolean}
+              disabled={
+                (loadingCreateSubsidiary || loadingUpdateSubsidiary) as boolean
+              }
             >
-              {loadingCreateStore ? (
-                <FaSpinner className="h-5 w-5 animate-spin text-white" />
-              ) : (
-                "Crear tienda"
-              )}
+              {subsidiary ? "Editar sucursal" : "Crear sucursal"}
+              {loadingCreateSubsidiary ? (
+                <div className="animate-spin">
+                  <Icon
+                    remixIconClass="ri-loader-4-line"
+                    color="white"
+                    size="xl"
+                  />
+                </div>
+              ) : null}
             </Button>
           </DialogFooter>
         </form>

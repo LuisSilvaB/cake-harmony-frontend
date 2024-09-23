@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit'
 import StoreReducers from '@/app/dashboard/store/feature/store.feature'
 import UserReducers from '@/app/auth/user/features/user.feature'
-import SubsidiaryReducers from '@/app/dashboard/subsidiary/feature/subsidiary.feature'
+import SubsidiaryReducers from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature'
 import tagsReducers from '@/app/dashboard/tags/feature/tags.feature'
 import productsReducers from '@/app/dashboard/products/store/[storeId]/subsidiary/[subsidiaryId]/feature/products.feature'
 

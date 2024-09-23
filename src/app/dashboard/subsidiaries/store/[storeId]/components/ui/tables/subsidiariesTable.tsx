@@ -1,19 +1,15 @@
-'use client'
 import React from 'react'
-import { StoreType } from '@/app/dashboard/store/types/store.type'
+import { SubsidiaryType } from '../../../types/subsidiary.type'
 import { createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import moment from 'moment'
-import { Button } from '@/components/ui'
-import Icon from '@/components/ui/icon'
-import StoreDialog from '../dialogs/storeDialog'
-import DeleteStoreDialog from '../dialogs/deleteStoreDialog'
+import SubsidiaryDialog from '../dialogs/subsidiaryDialog'
 
-type StoreTableProps = {
-  stores: StoreType[]
+type SubsidiariesTableProps = {
+  subsidiaries:SubsidiaryType[]
 }
 
-const StoreTable = ({ stores }: StoreTableProps) => {
-  const columnHelper = createColumnHelper<StoreType>()
+const SubsidiariesTable = ({ subsidiaries }: SubsidiariesTableProps) => {
+  const columnHelper = createColumnHelper<SubsidiaryType>()
   const columns = [
     columnHelper.accessor("id", {
       header: "ID",
@@ -35,15 +31,14 @@ const StoreTable = ({ stores }: StoreTableProps) => {
       header: "ACCIONES",
       cell: (info) => (
         <div className="flex w-full items-center justify-center gap-2">
-          <StoreDialog store={info.row.original} />
-          <DeleteStoreDialog store={info.row.original}/>
+          <SubsidiaryDialog subsidiary={info.row.original} />
         </div>
       ),
     }),
-  ];
+  ]
 
   const table = useReactTable({
-    data: stores,
+    data: subsidiaries,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -51,7 +46,6 @@ const StoreTable = ({ stores }: StoreTableProps) => {
     debugHeaders: true,
     debugColumns: true,
   })
-
   return (
     <table className="table-fixed">
     <thead>
@@ -98,4 +92,4 @@ const StoreTable = ({ stores }: StoreTableProps) => {
   )
 }
 
-export default StoreTable
+export default SubsidiariesTable

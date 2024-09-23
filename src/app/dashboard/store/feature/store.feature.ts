@@ -2,6 +2,7 @@ import { createSupabaseBrowserClient } from "@/libs/supabase/browser-client"
 import { toast } from "@/hooks/useToast"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { StoreType } from "../types/store.type"
+import { resetSubsidiaryStates } from "../../subsidiaries/store/[storeId]/feature/subsidiary.feature"
 
 const supabase = createSupabaseBrowserClient()
 
@@ -9,7 +10,7 @@ export const createStoreFeature = createAsyncThunk(
   "store/createStore",
   async (
     { storeToCreate, userId }: { storeToCreate: Omit<StoreType, "id" | "created_at"> ; userId: string },
-    { dispatch, getState },
+    { dispatch, rejectWithValue },
   ) => {
     try {
       const { data:dataStore, error:errorStore } = await supabase
@@ -17,7 +18,7 @@ export const createStoreFeature = createAsyncThunk(
       .select("STORE(*)")
       .eq("USER_ID", userId);
 
-      if(!dataStore) return null
+      if(!dataStore) return rejectWithValue(null)
 
       const storeExists = dataStore.find(
         (store: { STORE: any }) => store.STORE.name === storeToCreate.name,
@@ -29,7 +30,7 @@ export const createStoreFeature = createAsyncThunk(
           description: "Ya existe una tienda con ese nombre registrada",
           variant: "destructive",
         });
-        return null;
+        return rejectWithValue(null);
       }
       const { data, error } = await supabase.from("STORE").insert(storeToCreate).select();
       if (error && !data) {
@@ -38,7 +39,7 @@ export const createStoreFeature = createAsyncThunk(
           description: error.message,
           variant: "destructive",
         });
-        return;
+        return rejectWithValue(null);
       }
       dispatch(createUserStoreFeature({ storeId: data[0].id, userId }));
       toast({
@@ -54,6 +55,7 @@ export const createStoreFeature = createAsyncThunk(
         description: "Hubo un error al crear la tienda",
         variant: "destructive",
       });
+      return rejectWithValue(null);
     }
   },
 );
@@ -91,7 +93,7 @@ export const updateStoreFeature = createAsyncThunk(
   "store/updateStore",
   async (
     { changes, storeId, userId }: { changes: Omit<StoreType, "id" | "created_at"> ; storeId: number; userId: string },
-    { dispatch, getState },
+    { dispatch, rejectWithValue, getState },
   ) => {
     try {
       const { data:dataStore, error:errorStore } = await supabase
@@ -99,7 +101,7 @@ export const updateStoreFeature = createAsyncThunk(
       .select("STORE(*)")
       .eq("USER_ID", userId);
 
-      if(!dataStore) return null
+      if(!dataStore) return rejectWithValue(null)
 
       const storeExists: { STORE: any } | undefined = dataStore.find(
         (store: { STORE: any }) => store.STORE.name === changes.name,
@@ -111,7 +113,8 @@ export const updateStoreFeature = createAsyncThunk(
           description: "Ya existe una tienda con ese nombre registrada",
           variant: "destructive",
         });
-        return null;
+
+        return rejectWithValue(null);
       }
       const { data, error } = await supabase.from("STORE").update(changes).eq("id", storeId).select();
 
@@ -121,7 +124,7 @@ export const updateStoreFeature = createAsyncThunk(
           description: error.message,
           variant: "destructive",
         });
-        return;
+        return rejectWithValue(null);
       }
       toast({
         title: "Tienda actualizada",
@@ -134,6 +137,52 @@ export const updateStoreFeature = createAsyncThunk(
       toast({
         title: "Error al crear tienda",
         description: "Hubo un error al crear la tienda",
+        variant: "destructive",
+      });
+      return rejectWithValue(null);
+    }
+  },
+);
+
+export const deleteStoreFeature = createAsyncThunk(
+  "store/deleteStore",
+  async (
+    { storeId }: { storeId: number },
+    { dispatch, getState },
+  ) => {
+    try {
+
+      const { data: dataStore, error: errorStore } = await supabase.from("USER_STORE").delete().eq("STORE_ID", storeId);
+      if (errorStore) {
+        toast({
+          title: "Error al eliminar tienda",
+          description: errorStore.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      const { data, error } = await supabase.from("STORE").delete().eq("id", storeId).select();
+      if (error) {
+        toast({
+          title: "Error al eliminar tienda",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Tienda eliminada",
+        description: "Tienda eliminada con éxito",
+        duration: 5000,
+        variant: "default",
+      })
+      dispatch(setSelectedStore(null))
+      dispatch(resetSubsidiaryStates())
+      return data;
+    } catch (error) {
+      toast({
+        title: "Error al eliminar tienda",
+        description: "Hubo un error al eliminar la tienda",
         variant: "destructive",
       });
     }
@@ -185,6 +234,7 @@ const storeFeaturesSlice = createSlice({
     selectedStore: null as StoreType | null,
     loadingCreateStore: false,
     loadingUpdateStore: false,
+    loadingDeleteStore: false,
   },
   reducers: {
     resetStates: (state) => {
@@ -200,6 +250,8 @@ const storeFeaturesSlice = createSlice({
     },
   },
   extraReducers: (builder: any) => {
+
+    // create store
     builder.addCase(createStoreFeature.pending, (state: any) => {
       state.loadingCreateStore = true;
     });
@@ -207,16 +259,17 @@ const storeFeaturesSlice = createSlice({
       state.loadingCreateStore = false;
     });
     builder.addCase(createStoreFeature.fulfilled, (state: any, action: any) => {
-      // create sore
-      if( Array.isArray(action.payload)) state.stores = state.stores.push(action.payload[0]);
+      // create store
+      if( Array.isArray(action.payload)) state.stores = [ ...state.stores, action.payload[0]];
       state.loadingCreateStore = false;
 
       // update local storage
       const stores = localStorage.getItem("stores")
       if(!stores) return;
-      const storesData = JSON.parse(stores ?? '[]')
-      localStorage.setItem("stores", JSON.stringify([...storesData, action.payload[0]]));
+      localStorage.setItem("stores", JSON.stringify(state.stores));
     });
+
+    // update store
     builder.addCase(updateStoreFeature.pending, (state: any) => {
       state.loadingUpdateStore = true;
     });
@@ -224,7 +277,8 @@ const storeFeaturesSlice = createSlice({
       state.loadingUpdateStore = false;
     });
     builder.addCase(updateStoreFeature.fulfilled, (state: any, action: any) => {
-      
+      state.selectedStore = action.payload[0];
+      localStorage.setItem("selectedStore", JSON.stringify(action.payload[0]));
       //Upadate state 
       if( Array.isArray(action.payload)) state.stores = state.stores.map((store: any) => {
         if (store.id === action.payload[0].id) return action.payload[0];
@@ -237,13 +291,34 @@ const storeFeaturesSlice = createSlice({
       const storesData = JSON.parse(stores ?? '[]')
       if(!storesData) return;
       state.loadingUpdateStore = false;
-      const newStores = storesData.map((store: any) => {
-        if (store.id === action.payload[0].id) return action.payload[0];
-        return store;
-      });
-      localStorage.setItem("stores", JSON.stringify(newStores));
+      localStorage.setItem("stores", JSON.stringify(state.stores));
+      localStorage.setItem("selectedSubsidiary", "{}");
+      localStorage.setItem("subsidiaries", JSON.stringify([]));
     });
-    
+
+    // delete store
+    builder.addCase(deleteStoreFeature.pending, (state: any) => {
+      state.loadingDeleteStore = true;
+    });
+    builder.addCase(deleteStoreFeature.rejected, (state: any) => {
+      state.loadingDeleteStore = false;
+    });
+    builder.addCase(deleteStoreFeature.fulfilled, (state: any, action: any) => {
+      if(Array.isArray(action.payload)) state.stores = state.stores.filter((store: any) => store.id !== action.payload[0].id);
+
+      const stores = localStorage.getItem("stores")
+      
+      if(state.selectedStore.id === action.payload[0].id) localStorage.setItem("selectedStore", "{}"); 
+      
+      localStorage.setItem("selectedSubsidiary", "{}");
+      localStorage.setItem("subsidiaries", JSON.stringify([]));
+
+      const storesData = JSON.parse(stores ?? '[]')
+      if(!storesData) return;
+      state.loadingDeleteStore = false;
+      localStorage.setItem("stores", JSON.stringify(state.stores));
+    });
+
     builder.addCase(getStoresFeature.pending, (state: any) => {
       state.loading = true;
     });

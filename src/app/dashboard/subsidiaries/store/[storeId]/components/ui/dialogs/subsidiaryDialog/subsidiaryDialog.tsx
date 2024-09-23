@@ -3,12 +3,15 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SubsidiarySchema } from "../../../../schema/subsidiary.schema";
 import SubsidiaryDialogBody from './subsidiaryDialogBody/subsidiaryDialogBody';
-import { SubsidiaryType } from '@/app/dashboard/subsidiary/types/subsidiary.type';
-import { useParams } from 'next/navigation';
+import { SubsidiaryType } from '@/app/dashboard/subsidiaries/store/[storeId]/types/subsidiary.type';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 
-const SubsidiaryDialog = () => {
+type SubsidiaryDialogProps = {
+  subsidiary?: SubsidiaryType;
+}
+
+const SubsidiaryDialog = ( { subsidiary }: SubsidiaryDialogProps) => {
   const { selectedStore }  = useSelector((state: RootState) => state.store);
 
   const defaultValues = {
@@ -30,7 +33,7 @@ const SubsidiaryDialog = () => {
 
   return (
     <FormProvider {...formMetods}>
-      <SubsidiaryDialogBody />
+      <SubsidiaryDialogBody subsidiary={subsidiary} />
     </FormProvider>
   );
 }
