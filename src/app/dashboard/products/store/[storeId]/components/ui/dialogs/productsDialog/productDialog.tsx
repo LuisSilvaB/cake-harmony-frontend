@@ -8,7 +8,7 @@ import { productsTagsType, productsType, productsVariantsType } from '../../../.
 import { Button, Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { upperLowerCase } from '../../../../../../../../../../../utils/upperLowerCase.util';
+import { upperLowerCase } from '../../../../../../../../../utils/upperLowerCase.util';
 
 interface ProductDialogProps { 
   product: productsType

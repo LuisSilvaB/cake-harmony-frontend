@@ -165,6 +165,39 @@ export const  updateSubsidiaryFeature = createAsyncThunk(
   },
 );
 
+export const deleteSubsidiaryFeature = createAsyncThunk(
+  "subsidiary/deleteSubsidiary",
+  async (
+    { subsidiaryId }: { subsidiaryId: number },
+    { dispatch, getState, rejectWithValue },
+  ) => {
+    try {
+      const { data: dataSubsidiary, error: errorSubsidiary } = await supabase.from("SUBSIDIARY").delete().eq("id", subsidiaryId).select();
+      if (errorSubsidiary) {
+        toast({
+          title: "Error al eliminar sucursal",
+          description: errorSubsidiary.message,
+          variant: "destructive",
+        });
+        return rejectWithValue(null);
+      }
+      toast({
+        title: "Sucursal eliminada",
+        description: "Sucursal eliminada con éxito",
+        duration: 5000,
+        variant: "default",
+      })
+      return dataSubsidiary;
+    } catch (error) {
+      toast({
+        title: "Error al eliminar sucursal",
+        description: "Hubo un error al eliminar la sucursal",
+        variant: "destructive",
+      });
+      return rejectWithValue(null);
+    }
+  },
+);
 
 
 const subsidiaryFeaturesSlice = createSlice({
@@ -245,7 +278,22 @@ const subsidiaryFeaturesSlice = createSlice({
       state.loadingUpdateSubsidiary = false;
       localStorage.setItem("subsidiaries", JSON.stringify(state.subsidiaries));
     });
-
+    builder.addCase(deleteSubsidiaryFeature.pending, (state, action) => {
+      state.loadingDeleteSubsidiary = true;
+    });
+    builder.addCase(deleteSubsidiaryFeature.rejected, (state, action) => {
+      state.loadingDeleteSubsidiary = false;
+    });
+    builder.addCase(deleteSubsidiaryFeature.fulfilled, (state, action) => {
+      
+        if(Array.isArray(action.payload) && action.payload) state.subsidiaries = state.subsidiaries.filter((subsidiary: any) => subsidiary.id !== action.payload[0]?.id);  
+      if(state.selectedSubsidiary?.id === action?.payload[0]?.id) {
+        state.selectedSubsidiary = null;
+        localStorage.setItem("selectedSubsidiary", "{}");
+      }
+      localStorage.setItem("subsidiaries", JSON.stringify(state.subsidiaries));
+      state.loadingDeleteSubsidiary = false;
+    });
   }
 });
 

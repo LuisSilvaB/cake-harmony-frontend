@@ -3,6 +3,7 @@ import { SubsidiaryType } from '../../../types/subsidiary.type'
 import { createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, useReactTable } from '@tanstack/react-table'
 import moment from 'moment'
 import SubsidiaryDialog from '../dialogs/subsidiaryDialog'
+import DeleteSubsidiaryDialog from '../dialogs/deleteSubsidiaryDialog'
 
 type SubsidiariesTableProps = {
   subsidiaries:SubsidiaryType[]
@@ -32,6 +33,7 @@ const SubsidiariesTable = ({ subsidiaries }: SubsidiariesTableProps) => {
       cell: (info) => (
         <div className="flex w-full items-center justify-center gap-2">
           <SubsidiaryDialog subsidiary={info.row.original} />
+          <DeleteSubsidiaryDialog subsidiary={info.row.original} />
         </div>
       ),
     }),

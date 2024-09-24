@@ -2,8 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { createSupabaseBrowserClient } from '@/libs/supabase/browser-client'
 import { toast } from '@/hooks/useToast'
-import { debounce } from 'lodash';
-import { productsType } from '../types/products.type'
+import { productsType } from '../types/globalProducts.type'
 
 const supabase = createSupabaseBrowserClient()
 
