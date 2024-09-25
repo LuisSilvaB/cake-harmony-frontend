@@ -49,7 +49,7 @@ const SubsidiariesTable = ({ subsidiaries }: SubsidiariesTableProps) => {
     debugColumns: true,
   })
   return (
-    <table className="table-fixed">
+    <table className="w-full overflow-hidden rounded-lg">
     <thead>
       {table.getHeaderGroups().map((headerGroups, index) => (
         <tr

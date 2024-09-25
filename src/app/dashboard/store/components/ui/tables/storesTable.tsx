@@ -53,7 +53,7 @@ const StoreTable = ({ stores }: StoreTableProps) => {
   })
 
   return (
-    <table className="table-fixed">
+    <table className="w-full overflow-hidden rounded-lg">
     <thead>
       {table.getHeaderGroups().map((headerGroups, index) => (
         <tr

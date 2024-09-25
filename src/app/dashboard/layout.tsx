@@ -5,12 +5,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <section className="flex w-full flex-1 flex-row">
       <Sidebar />
-      <div className="flex w-full flex-1 flex-col max-w-[calc(100%-190px)]">
+      <div className="flex w-full max-w-[calc(100%-190px)] flex-1 flex-col">
         <PermissionsLoader />
         <Navbar />
-        <div className="flex w-full flex-1 flex-col p-2 ">
-          {children}
-        </div>
+        <div className="flex w-full flex-1 flex-col p-2">{children}</div>
       </div>
     </section>
   );

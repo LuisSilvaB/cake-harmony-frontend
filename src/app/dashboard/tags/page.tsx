@@ -1,13 +1,17 @@
 'use client'
-import React, { useEffect } from 'react'
-import TagsBody from './components/layout/tagsBody'
+import React, { lazy, useEffect } from 'react'
+import Layout from './layout'
 
+const TagsHeader = lazy(()=>import("./components/layout/tagsHeader"))
+const TagsBody = lazy(()=>import("./components/layout/tagsBody"))
 
 const TagsPage = () => {
+
   return (
-    <div className='flex flex-col flex-1 w-full align-center'>
+    <Layout>
+      <TagsHeader />
       <TagsBody />   
-    </div>
+    </Layout>
   )
 }
 

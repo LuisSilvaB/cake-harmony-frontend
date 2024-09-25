@@ -21,7 +21,7 @@ const TagsBody = () => {
     );
 
   return (
-    <div className='w-full flex flex-col p-3'>
+    <div className=''>
       <TagsTable tags = {tags} />
     </div>
   )
