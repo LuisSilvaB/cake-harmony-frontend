@@ -17,9 +17,10 @@ import { upperLowerCase } from '../../../../../../utils/upperLowerCase.util';
 
 type TagsTableProps = {
   tags: TagsType[]
+  mainTags: TagsType[]
 }
 
-const TagsTable = ( { tags }: TagsTableProps) => {
+const TagsTable = ( { tags, mainTags }: TagsTableProps) => { 
 
   const columnHelper = createColumnHelper<TagsType>()
   const columns = [

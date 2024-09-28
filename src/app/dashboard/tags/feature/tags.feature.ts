@@ -20,6 +20,21 @@ export const getTags = createAsyncThunk(
   },
 )
 
+export const getAllMainTags = createAsyncThunk(
+  "tags/getAllMainTags",
+  async () => {
+    const { data, error } = await supabase.from("TAG").select("*").is("id_main_tag", null)
+    if (error) {
+      toast({
+        title: "Error al obtener las etiquetas",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+    return data as TagsType[]
+  },
+)
+
 export const createTag = createAsyncThunk(
   "tags/createTag",
   async (tagToCreate: TagsType, { dispatch, getState }) => {
@@ -56,11 +71,15 @@ const tagsSlice = createSlice({
   initialState: {
     tags: [] as TagsType[],
     loading: false,
+    mainTags: [] as TagsType[],
+    loadingMainTags: false,
   },
   reducers: {
     resetStates: (state) => {
       state.tags = []
       state.loading = false
+      state.mainTags = []
+      
     },
   },
   extraReducers: (builder) => {
@@ -84,6 +103,16 @@ const tagsSlice = createSlice({
     })
     builder.addCase(createTag.rejected, (state, action) => {
       state.loading = false
+    })
+    builder.addCase(getAllMainTags.pending, (state, action) => {
+      state.loadingMainTags = true
+    })
+    builder.addCase(getAllMainTags.fulfilled, (state, action) => {
+      state.mainTags = action.payload || []
+      state.loadingMainTags = false
+    })
+    builder.addCase(getAllMainTags.rejected, (state, action) => {
+      state.loadingMainTags = false
     })
   },
 })

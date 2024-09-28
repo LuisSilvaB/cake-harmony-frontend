@@ -7,9 +7,11 @@ import { TagSchema } from '@/app/dashboard/tags/schema/tag.schema'
 
 type TagDialogProps = {
   tag?: TagsType
+  mainTags: TagsType[]
+  loadingMainTags: boolean
 }
 
-const TagDialog = ( { tag }: TagDialogProps) => {
+const TagDialog = ( { tag, mainTags, loadingMainTags }: TagDialogProps) => {
   const defaultValues: TagsType = {
     id: 0,
     color: "",
@@ -23,11 +25,11 @@ const TagDialog = ( { tag }: TagDialogProps) => {
     resolver: zodResolver(TagSchema),
     mode: "all",
     reValidateMode: "onSubmit", 
-    
   });
+
   return (
     <FormProvider {...formMethods}>
-      <TagDialogBody tag={tag} />
+      <TagDialogBody tag={tag} mainTags = {mainTags} loadingMainTags = {loadingMainTags} />
     </FormProvider>
   );
 }
