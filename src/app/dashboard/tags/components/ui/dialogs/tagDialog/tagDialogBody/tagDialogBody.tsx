@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+"use client"
+import React, { useEffect, useRef } from 'react';
 import { TagsType } from '@/app/dashboard/tags/types/tags.type';
 import { Button, Input, Label } from '@/components/ui';
 import {
@@ -35,8 +36,8 @@ import { FaSpinner } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
+import { createTagFeature } from '@/app/dashboard/tags/feature/tags.feature';
 
- 
 
 type TagDialogBodyProps = {
   tag?: TagsType
@@ -47,18 +48,25 @@ type TagDialogBodyProps = {
 const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) => {
   const toggle = useToggle(); 
   const toggleCombobox = useToggle()
-  const [mainTag, setMainTag] = React.useState("")
+  const colorPickerRef = useRef<HTMLInputElement>(null);
+
   const {
     control,
     formState: { isValid },
     handleSubmit,
     setValue,
+    getValues,
   } = useFormContext<Omit<TagsType, "id" | "created_at">>(); 
   const session = useSession()
   const dispatch = useDispatch<AppDispatch>()
-
+  const { loadingCreateTag, loadingUpdateTag } = useSelector((state: RootState) => state.tags)
+  console.log(tag)
+  console.log(isValid, session?.user)
+  console.log("hola")
   const onSubmitCreate: SubmitHandler<Omit<TagsType, "id" | "created_at">> = async (data) => {
+
     try {
+      console.log("tratando de crear")
       if (!isValid || !session?.user) {
         toast({
           title: "Error",
@@ -67,14 +75,16 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
         });
         return
       }
-      // const tag = await dispatch(
-      //   // createTagFeature({ tagToCreate: data, userId: session.user.id }),
-      // );
+      const { color, name, id_main_tag } = data;
+      const tag = await dispatch(
+        createTagFeature({ color, name, id_main_tag }),
+      );
+
       if (!tag) return;
 
-      // if (Array.isArray(tag.payload)) {
-      //   toggle.onClose();
-      // };
+      if (Array.isArray(tag.payload)) {
+        toggle.onClose();
+      };
       
     } catch (error) {
       return; 
@@ -86,7 +96,7 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
       if (!isValid || !session?.user) {
         toast({
           title: "Error",
-          description: "Complete los campos requeridos",
+          description: "Complete los campos requeridos test",
           duration: 5000,
         });
         return
@@ -115,6 +125,13 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
     });
   }
 
+  const onClose = () => {
+    toggle.onClose();
+    setValue("color", "");
+    setValue("name", "");
+    setValue("id_main_tag", 0);
+  }
+
   useEffect(()=>{
     if(tag) {
       setValue("color", tag.color);
@@ -125,6 +142,7 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
       setValue("name", "");
       setValue("id_main_tag", 0);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
@@ -134,7 +152,7 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
   }))
 
   return (
-    <Dialog open={toggle.isOpen} onOpenChange={toggle.onClose}>
+    <Dialog open={toggle.isOpen} onOpenChange={onClose}>
       <TooltipProvider>
         {tag ? (
           <Tooltip>
@@ -219,82 +237,114 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
               <FormField
                 control={control}
                 name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Color</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value}
-                        onChange={field.onChange}
-                        type="color"
-                        placeholder="Color"
-                        className="min-w-56 border"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div>
-              <Popover
-                open={toggleCombobox.isOpen}
-                onOpenChange={toggleCombobox.onToggle}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    className="w-[200px] justify-between"
-                  >
-                    {mainTag
-                      ? mainTagsOptions.find(
-                          (framework) => framework.value === mainTag,
-                        )?.label
-                      : "Select framework..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput placeholder="Search framework..." />
-                    <CommandList>
-                      <CommandEmpty>No framework found.</CommandEmpty>
-                      <CommandGroup>
-                        {mainTagsOptions.map((framework) => (
-                          <CommandItem
-                            key={framework.value}
-                            value={framework.value}
-                            onSelect={(currentValue) => {
-                              setMainTag(
-                                currentValue === mainTag ? "" : currentValue,
-                              );
-                              toggleCombobox.onClose();
+                render={({ field }) => {
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Color</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input
+                            ref={colorPickerRef}
+                            value={field.value}
+                            onChange={field.onChange}
+                            type="color"
+                            placeholder="Color"
+                            className="min-w-56 border"
+                          />
+                          <div
+                            className="absolute top-0 flex h-full w-full items-center justify-between rounded-md border bg-white px-2"
+                            onClick={() => {
+                              if (!colorPickerRef) return;
+                              else colorPickerRef.current?.click();
                             }}
                           >
-                            <Check
-                              className={cn(
-                                "mr-2 h-4 w-4",
-                                mainTag === framework.value
-                                  ? "opacity-100"
-                                  : "opacity-0",
-                              )}
+                            <p className="font text-xs font-medium">
+                              {getValues("color")?.length ? getValues("color") : "Seleccione un color"}
+                            </p>
+                            <span
+                              className="h-3 w-3 rounded-full"
+                              style={{
+                                backgroundColor: getValues("color"),
+                              }}
                             />
-                            {framework.label}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+                          </div>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
+            <div className="">
+              <FormField control={control} name="id_main_tag" render={({field}) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Categoría principal</FormLabel>
+                    <FormControl>
+                      <Popover
+                        open={toggleCombobox.isOpen}
+                        onOpenChange={toggleCombobox.onToggle}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                          >
+                              {
+                                field.value
+                                ? mainTags.find((mainTag)=> mainTag.id === field.value)?.name
+                                : "Seleccione una categoria"
+                              }
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar categoria..." />
+                            <CommandList>
+                              <CommandEmpty>
+                                Categorias no encontradas
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {mainTagsOptions.map((tag) => (
+                                  <CommandItem
+                                    key={tag.value}
+                                    value={tag.value}
+                                    onSelect={(currentValue) => {
+                                      setValue("id_main_tag", mainTags.find((mainTag)=> mainTag.name.toLowerCase() === currentValue)?.id ?? 0);
+                                      toggleCombobox.onClose();
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        mainTags.find((mainTag)=> mainTag.name.toLowerCase() === tag.value.toLowerCase())?.id === field.value 
+                                          ? "opacity-100"
+                                          : "opacity-0",
+                                      )}
+                                    />
+                                    {tag.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                  </FormItem>
+                );
+              }}/>
             </div>
           </div>
           <DialogFooter>
-            {/* <Button
+            <Button
               type="submit"
               className="hover:text-whte mt-2 flex flex-row items-center gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
-              disabled={loadingCreateTag as boolean}
+              disabled={loadingCreateTag || loadingUpdateTag}
             >
               {tag ? "Editar categoría" : "Crear categoría"}
 
@@ -303,7 +353,7 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
                   <Icon remixIconClass='ri-loader-4-line' color='white' size='xl' />
                 </div>
               ) : null}
-            </Button> */}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

@@ -35,44 +35,64 @@ export const getAllMainTags = createAsyncThunk(
   },
 )
 
-export const createTag = createAsyncThunk(
+export const createTagFeature = createAsyncThunk(
   "tags/createTag",
-  async (tagToCreate: TagsType, { dispatch, getState }) => {
+  async (tagToCreate: Omit<TagsType, "id" | "created_at">, { dispatch, getState, rejectWithValue }) => {
     try {
-      const { data, error } = await supabase.from("TAG").insert(tagToCreate).select()
+      const { data: sameTag, error: sameTagError } = await supabase
+        .from("TAG")
+        .select("id")
+        .ilike("name", `%${tagToCreate.name}%`);
+      if (sameTagError) {
+        toast({
+          title: "Error al obtener las etiquetas",
+          description: sameTagError.message,
+          variant: "destructive",
+        });
+        return rejectWithValue(null);
+      }
+
+      console.log("sameTag", sameTag);
+
+      const { data, error } = await supabase
+        .from("TAG")
+        .insert(tagToCreate)
+        .select();
       if (error && !data) {
         toast({
           title: "Error al crear etiqueta",
           description: error.message,
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
       toast({
         title: "Etiqueta creada",
         description: "Etiqueta creada con éxito",
         duration: 5000,
         variant: "default",
-      })
-      return data
-
+      });
+      return data;
     } catch (error) {
       toast({
         title: "Error al crear etiqueta",
         description: "Hubo un error al crear la etiqueta",
         variant: "destructive",
-      })
+      });
     }
   },
-)
+);
 
 const tagsSlice = createSlice({
   name: "tags",
   initialState: {
     tags: [] as TagsType[],
-    loading: false,
     mainTags: [] as TagsType[],
+    loading: false,
     loadingMainTags: false,
+    loadingCreateTag: false,
+    loadingUpdateTag: false,
+    loadingDeleteTag: false,
   },
   reducers: {
     resetStates: (state) => {
@@ -93,16 +113,16 @@ const tagsSlice = createSlice({
     builder.addCase(getTags.rejected, (state, action) => {
       state.loading = false
     })
-    builder.addCase(createTag.pending, (state, action) => {
-      state.loading = true
+    builder.addCase(createTagFeature.pending, (state, action) => {
+      state.loadingCreateTag = true
     })
-    builder.addCase(createTag.fulfilled, (state, action) => {
+    builder.addCase(createTagFeature.fulfilled, (state, action) => {
       if( Array.isArray(action.payload)) state.tags.push(action.payload[0]);
 
-      state.loading = false
+      state.loadingCreateTag = false
     })
-    builder.addCase(createTag.rejected, (state, action) => {
-      state.loading = false
+    builder.addCase(createTagFeature.rejected, (state, action) => {
+      state.loadingCreateTag = false
     })
     builder.addCase(getAllMainTags.pending, (state, action) => {
       state.loadingMainTags = true
