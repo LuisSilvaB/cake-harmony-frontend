@@ -36,7 +36,7 @@ import { FaSpinner } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/utils/cn';
-import { createTagFeature } from '@/app/dashboard/tags/feature/tags.feature';
+import { createTagFeature, updateTagFeature } from '@/app/dashboard/tags/feature/tags.feature';
 
 
 type TagDialogBodyProps = {
@@ -60,13 +60,10 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
   const session = useSession()
   const dispatch = useDispatch<AppDispatch>()
   const { loadingCreateTag, loadingUpdateTag } = useSelector((state: RootState) => state.tags)
-  console.log(tag)
-  console.log(isValid, session?.user)
-  console.log("hola")
   const onSubmitCreate: SubmitHandler<Omit<TagsType, "id" | "created_at">> = async (data) => {
 
     try {
-      console.log("tratando de crear")
+      console.log("tratando de crear") 
       if (!isValid || !session?.user) {
         toast({
           title: "Error",
@@ -101,14 +98,14 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
         });
         return
       }
-      // const newTag = await dispatch(
-      //   // updateTagFeature({ changes: data, tagId: Number(tag?.id ?? 0), userId: session.user.id }),
-      // );
-      // if (!tag) return;
+      const newTag = await dispatch(
+        updateTagFeature({ tagToUpdate: data, tagId: Number(tag?.id ?? 0)}),
+      );
+      if (!tag) return;
 
-      // if (Array.isArray(newTag.payload)) {
-      //   toggle.onClose();
-      // };
+      if (Array.isArray(newTag.payload)) {
+        toggle.onClose();
+      };
       
     } catch (error) {
       return; 
@@ -127,16 +124,13 @@ const TagDialogBody = ( { tag, mainTags, loadingMainTags }: TagDialogBodyProps) 
 
   const onClose = () => {
     toggle.onClose();
-    setValue("color", "");
-    setValue("name", "");
-    setValue("id_main_tag", 0);
   }
 
   useEffect(()=>{
     if(tag) {
       setValue("color", tag.color);
       setValue("name", tag.name);
-      setValue("id_main_tag", tag.id_main_tag);
+      setValue("id_main_tag", tag.id_main_tag ?? 0);
     } else {
       setValue("color", "");
       setValue("name", "");

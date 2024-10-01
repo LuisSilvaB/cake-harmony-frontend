@@ -14,13 +14,15 @@ import { Button } from '@/components/ui';
 import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { upperLowerCase } from '../../../../../../utils/upperLowerCase.util';
+import TagDialog from '../dialogs/tagDialog';
 
 type TagsTableProps = {
   tags: TagsType[]
   mainTags: TagsType[]
+  loadingMainTags: boolean
 }
 
-const TagsTable = ( { tags, mainTags }: TagsTableProps) => { 
+const TagsTable = ( { tags, mainTags, loadingMainTags }: TagsTableProps) => { 
 
   const columnHelper = createColumnHelper<TagsType>()
   const columns = [
@@ -54,9 +56,12 @@ const TagsTable = ( { tags, mainTags }: TagsTableProps) => {
       header: "Acciones",
       cell: (info) => (
         <div className="flex w-full items-center justify-center gap-2">
-          <Button size="xs" variant="secondary">
-            <Icon remixIconClass="ri-edit-2-line" />
-          </Button>
+          <TagDialog
+            tag={info.row.original}
+            mainTags={mainTags}
+            loadingMainTags={loadingMainTags}
+          />
+          
           <Button size="xs" variant="destructive">
             <Icon remixIconClass="ri-delete-bin-2-line" color="white" />
           </Button>

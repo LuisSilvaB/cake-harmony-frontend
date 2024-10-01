@@ -1,4 +1,4 @@
-import TagsTable from '../../ui/tagsTable'
+import TagsTable from '../../ui/tables'
 import { RootState } from '@/redux/store'
 import { useSelector } from 'react-redux'
 import { FaSpinner } from 'react-icons/fa'
@@ -21,7 +21,7 @@ const TagsBody = () => {
 
   return (
     <div className=''>
-      <TagsTable tags = {tags} mainTags = {mainTags} />
+      <TagsTable tags = {tags} mainTags = {mainTags} loadingMainTags = {loadingMainTags} />
     </div>
   )
 }
