@@ -15,6 +15,7 @@ import Icon from '@/components/ui/icon';
 import { Badge } from '@/components/ui/badge';
 import { upperLowerCase } from '../../../../../../utils/upperLowerCase.util';
 import TagDialog from '../dialogs/tagDialog';
+import DeleteTagDialog from '../dialogs/deleteTagDialog';
 
 type TagsTableProps = {
   tags: TagsType[]
@@ -61,10 +62,7 @@ const TagsTable = ( { tags, mainTags, loadingMainTags }: TagsTableProps) => {
             mainTags={mainTags}
             loadingMainTags={loadingMainTags}
           />
-          
-          <Button size="xs" variant="destructive">
-            <Icon remixIconClass="ri-delete-bin-2-line" color="white" />
-          </Button>
+          <DeleteTagDialog tag={info.row.original} />
         </div>
       ),
     }),

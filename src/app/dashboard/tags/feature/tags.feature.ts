@@ -166,6 +166,40 @@ export const updateTagFeature = createAsyncThunk(
   },
 );
 
+export const deleteTagFeature = createAsyncThunk(
+  "tags/deleteTag",
+  async ({ tagId }: { tagId: number} , { dispatch, getState, rejectWithValue }) => {
+    try {
+      const { data, error } = await supabase
+        .from("TAG")
+        .delete()
+        .eq("id", tagId)
+        .select().single();
+      if (error) {
+        toast({
+          title: "Error al eliminar Categoría",
+          description: error.message,
+          variant: "destructive",
+        });
+        return rejectWithValue(null);
+      }
+      toast({
+        title: "Categoría eliminada",
+        description: "Categoría eliminada con éxito",
+        duration: 5000,
+        variant: "default",
+      });
+      return data;
+    } catch (error) {
+      toast({
+        title: "Error al eliminar Categoría",
+        description: "Hubo un error al eliminar la Categoría",
+        variant: "destructive",
+      });
+    }
+  },
+);
+
 const tagsSlice = createSlice({
   name: "tags",
   initialState: {
@@ -216,7 +250,7 @@ const tagsSlice = createSlice({
     builder.addCase(updateTagFeature.fulfilled, (state, action: any) => {
       console.log(action.payload)
       if (Array.isArray(action.payload) && action.payload.length){
-        state.tags.map((tag: any) => {
+        state.tags = state.tags.map((tag: any) => {
           if (action.payload[0]?.id === tag.id) return action.payload[0];
           return tag;
         });
@@ -236,6 +270,20 @@ const tagsSlice = createSlice({
     })
     builder.addCase(getAllMainTags.rejected, (state, action) => {
       state.loadingMainTags = false
+    })
+    builder.addCase(deleteTagFeature.pending, (state, action) => {
+      state.loadingDeleteTag = true
+    })
+    builder.addCase(deleteTagFeature.fulfilled, (state, action) => {
+      if (action.payload){
+        state.tags = state.tags.filter(
+          (tag: any) => tag.id !== action.payload.id,
+        );
+      }
+      state.loadingDeleteTag = false;
+    });
+    builder.addCase(deleteTagFeature.rejected, (state, action) => {
+      state.loadingDeleteTag = false
     })
   },
 })
