@@ -2,12 +2,13 @@ import { createSupabaseBrowserClient } from "@/libs/supabase/browser-client"
 import { toast } from "@/hooks/useToast"
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
 import { TagsType } from "@/app/dashboard/tags/types/tags.type" 
+import { set } from "lodash"
 
 const supabase = createSupabaseBrowserClient()
 
 export const getTags = createAsyncThunk(
   "tags/getTags",
-  async () => {
+  async ( _,{ dispatch, getState, rejectWithValue }) => {
     const { data, error } = await supabase.from("TAG").select("*")
     if (error) {
       toast({
@@ -16,21 +17,10 @@ export const getTags = createAsyncThunk(
         variant: "destructive",
       })
     }
-    return data as TagsType[]
-  },
-)
-
-export const getAllMainTags = createAsyncThunk(
-  "tags/getAllMainTags",
-  async () => {
-    const { data, error } = await supabase.from("TAG").select("*").is("id_main_tag", null)
-    if (error) {
-      toast({
-        title: "Error al obtener las etiquetas",
-        description: error.message,
-        variant: "destructive",
-      })
-    }
+    const mainTags = data
+      ? data?.filter((tag: TagsType) => tag.id_main_tag === null)
+      : [];
+    dispatch(setMainTags(mainTags))
     return data as TagsType[]
   },
 )
@@ -215,9 +205,11 @@ const tagsSlice = createSlice({
     resetStates: (state) => {
       state.tags = []
       state.loading = false
-      state.mainTags = []
-      
+      state.mainTags = []      
     },
+    setMainTags: (state, action) => { 
+      state.mainTags = action.payload
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(getTags.pending, (state, action) => {
@@ -261,16 +253,6 @@ const tagsSlice = createSlice({
     builder.addCase(updateTagFeature.rejected, (state, action) => {
       state.loadingUpdateTag = false
     })
-    builder.addCase(getAllMainTags.pending, (state, action) => {
-      state.loadingMainTags = true
-    })
-    builder.addCase(getAllMainTags.fulfilled, (state, action) => {
-      state.mainTags = action.payload || []
-      state.loadingMainTags = false
-    })
-    builder.addCase(getAllMainTags.rejected, (state, action) => {
-      state.loadingMainTags = false
-    })
     builder.addCase(deleteTagFeature.pending, (state, action) => {
       state.loadingDeleteTag = true
     })
@@ -288,6 +270,6 @@ const tagsSlice = createSlice({
   },
 })
 
-export const { resetStates } = tagsSlice.actions
+export const { resetStates, setMainTags } = tagsSlice.actions
 
 export default tagsSlice.reducer  

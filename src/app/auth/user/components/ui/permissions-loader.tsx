@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -12,44 +12,56 @@ import { setSelectedStore, setStores } from '@/app/dashboard/store/feature/store
 import { setSelectedSubsidiary, setSubsidiaries } from '@/app/dashboard/subsidiaries/store/[storeId]/feature/subsidiary.feature';
 import { StoreType } from '@/app/dashboard/store/types/store.type';
 import { SubsidiaryType } from '@/app/dashboard/subsidiaries/store/[storeId]/types/subsidiary.type';
+import { useRouter } from 'next/navigation'; 
+import Cookies from 'js-cookie';
 
 const PermissionsLoader = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const [ loader, setLoader ] = useState<ReactNode | null>(<PermissionsCustomLoader />);
+  const router = useRouter();
+  const [loader, setLoader] = useState<ReactNode | null>(<PermissionsCustomLoader />);
+
+  const clearStorageAndRedirect = () => {
+    localStorage.clear();
+    Cookies.remove('user-auth-access-token');
+    router.push('/auth/login');
+  };
 
   useEffect(() => {
-    const permissions = localStorage.getItem('permissions')
-    const user = localStorage.getItem('user')
-    
-    const permissionsData = JSON.parse(permissions ?? '[]')
-    const userData = JSON.parse(user ?? '{}') as UserType
+    const storedData = {
+      permissions: localStorage.getItem('permissions'),
+      user: localStorage.getItem('user'),
+      selectedStore: localStorage.getItem('selectedStore'),
+      selectedSubsidiary: localStorage.getItem('selectedSubsidiary'),
+      stores: localStorage.getItem('stores'),
+      subsidiaries: localStorage.getItem('subsidiaries'),
+    };
 
-    const selectedStore = localStorage.getItem('selectedStore')
-    const selectedSubsidiary = localStorage.getItem('selectedSubsidiary')
+    if (!storedData.permissions || !storedData.user) {
+      clearStorageAndRedirect();
+      return;
+    }
 
-    const store = JSON.parse(selectedStore ?? '{}')
-    const subsidiary = JSON.parse(selectedSubsidiary ?? '{}')
+    try {
+      const permissionsData = JSON.parse(storedData.permissions ?? '[]');
+      const userData = JSON.parse(storedData.user ?? '{}') as UserType;
+      const store = JSON.parse(storedData.selectedStore ?? '{}');
+      const subsidiary = JSON.parse(storedData.selectedSubsidiary ?? '{}');
+      const stores: StoreType[] = JSON.parse(storedData.stores ?? '[]');
+      const subsidiaries: SubsidiaryType[] = JSON.parse(storedData.subsidiaries ?? '[]');
 
-    const storesData  = localStorage.getItem('stores')
-    const subsidiariesData = localStorage.getItem('subsidiaries')
-
-    let stores: StoreType[] = []
-    let subsidiaries: SubsidiaryType[] = []
-
-    if(storesData) {stores = JSON.parse(storesData ?? '[]')}
-    if(subsidiariesData) {subsidiaries = JSON.parse(subsidiariesData ?? '[]')}
-
-    if (permissionsData && userData) {
-      setLoader(null)
-      dispatch(setPermissions(permissionsData))
-      dispatch(setUser(userData)) }
-      dispatch(setSelectedStore(store));
-      dispatch(setSelectedSubsidiary(subsidiary))
-      dispatch(setStores(stores));
-      dispatch(setSubsidiaries(subsidiaries));
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-  
-  }, [dispatch]);
+      if (permissionsData && userData) {
+        setLoader(null);
+        dispatch(setPermissions(permissionsData));
+        dispatch(setUser(userData));
+        dispatch(setSelectedStore(store));
+        dispatch(setSelectedSubsidiary(subsidiary));
+        dispatch(setStores(stores));
+        dispatch(setSubsidiaries(subsidiaries));
+      }
+    } catch (error) {
+      clearStorageAndRedirect();
+    }
+  }, [router, dispatch]);
 
   return loader;
 };
@@ -75,5 +87,5 @@ const PermissionsCustomLoader = () => {
         </div>
       </section>
     </div>
-  )
-}
+  );
+};

@@ -118,8 +118,7 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
     debugColumns: false,
   })
   return (
-    <>
-      <table className="table-fixed">
+      <table className="w-full overflow-hidden rounded-lg">
         <thead>
           {table.getHeaderGroups().map((headerGroups, index) => (
             <tr
@@ -161,7 +160,6 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
           ))}
         </tbody>
       </table>
-    </>
   );
 };
 

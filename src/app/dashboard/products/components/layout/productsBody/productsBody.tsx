@@ -27,18 +27,6 @@ const ProductsBody = () => {
 
   return (
     <div className="flex w-full flex-col overflow-auto">
-      <div className="flex w-full items-center justify-between p-2">
-        <div className='flex flex-col gap-1 justify-start'>
-          <p className="text-2xl font-bold">{selectedStore?.name}</p>
-          <Badge className='w-fit'>Mis productos</Badge>
-        </div>
-        <Button
-          className="rounded-md bg-atomic-tangerine-600 px-4 py-2 text-white hover:bg-atomic-tangerine-700"
-          size={"sm"}
-        >
-          Agregar producto
-        </Button>
-      </div>
       <ProductTable globalProducts={products} />
     </div>
   );

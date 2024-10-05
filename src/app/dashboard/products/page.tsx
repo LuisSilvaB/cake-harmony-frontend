@@ -1,27 +1,16 @@
 "use client"
-import React, { lazy, useEffect } from 'react'
-import { useSelector } from 'react-redux';
-import { RootState } from '@/redux/store';
-import { useRouter } from 'next/navigation';
-import Layout from './layout';
+import React, { lazy } from 'react'
+import ProductsLayout from './layout';
+import ProductsHeader from '../tags/components/layout/tagsHeader/productsHeader';
 
 const ProductsPage = () => {
-  const router = useRouter();
-  const storesSelector = useSelector((state: RootState) => state.store);
-
-  useEffect(() => {
-    if (storesSelector.selectedStore?.id) {
-      router.push(`/dashboard/products/store/${storesSelector.selectedStore?.id}`);
-    }
-    
-  }, [storesSelector.selectedStore, router]);
-
-  const Body = lazy(() => import('./components/layout/body/body'));
+  const ProductsBody = lazy(() => import('./components/layout/productsBody'));
 
   return (
-    <Layout>
-      <Body />
-    </Layout>
+    <ProductsLayout>
+      <ProductsHeader />
+      <ProductsBody />
+    </ProductsLayout>
   );
 }
 

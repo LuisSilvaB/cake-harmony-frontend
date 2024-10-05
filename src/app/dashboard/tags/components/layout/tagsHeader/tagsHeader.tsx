@@ -5,15 +5,15 @@ import { poppins } from '@/fonts'
 import TagDialog from '../../ui/dialogs/tagDialog'
 import { useDispatch, useSelector} from 'react-redux' 
 import { AppDispatch, RootState } from '@/redux/store'
-import { getAllMainTags, getTags } from '../../../feature/tags.feature'
+import { getTags } from '../../../feature/tags.feature'
 
 const TagsHeader = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { mainTags, loadingMainTags } = useSelector((state: RootState) => state.tags)
+  const { mainTags, tags, loadingMainTags } = useSelector((state: RootState) => state.tags)
   useEffect(() => {
     const fetchData = async () => {
+      if (tags.length &&  mainTags.length) return;
       await dispatch(getTags())
-      await dispatch(getAllMainTags())
     }
     fetchData()
   }, [dispatch])
