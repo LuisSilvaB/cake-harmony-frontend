@@ -1,18 +1,26 @@
-import ProductDialog from '@/app/dashboard/products/components/ui/dialogs/productsDialog'
+import ProductDialog from '@/app/dashboard/products/store/[storeId]/components/ui/dialogs/productsDialog'
 import { poppins } from '@/fonts'
 import { AppDispatch, RootState } from '@/redux/store'
 import cx from '@/utils/cx'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { getTags } from '../../../feature/tags.feature'
+import { getTags } from '../../../../../../tags/feature/tags.feature'
+import { getAllProductsByStoreId } from '../../../feature/products.feature'
 
 const ProductsHeader = () => {
   const dispatch = useDispatch<AppDispatch>() 
   const { tags, loading:loadingTags } = useSelector((state: RootState) => state.tags) 
+  const { selectedStore } = useSelector((state: RootState) => state.store)
+  
   useEffect(()=>{
-    dispatch(getTags())
+    const fetchData = async () => {
+      await dispatch(getAllProductsByStoreId({ storeId: selectedStore?.id ?? 0 }))
+      await dispatch(getTags())
+    }
+
+    fetchData()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[])
+  },[dispatch])
   return (
     <div
       className={cx(

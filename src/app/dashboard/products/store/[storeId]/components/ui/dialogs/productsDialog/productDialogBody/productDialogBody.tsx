@@ -1,5 +1,5 @@
 import { productsType } from '@/app/dashboard/globalProducts/types/globalProducts.type'
-import { ProductSchemaType } from '@/app/dashboard/products/schema/product.schema'
+import { ProductSchemaType } from '@/app/dashboard/products/store/[storeId]/schema/product.schema'
 import { TagsType } from '@/app/dashboard/tags/types/tags.type'
 import { Button, Input } from '@/components/ui'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import useToggle from '@/hooks/useToggle.hook'
 import { cn } from '@/utils/cn'
 import { Check, ChevronsUpDown } from 'lucide-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useFormContext } from 'react-hook-form'
 
 type ProductsDialogBodyProps = {
@@ -23,20 +23,18 @@ type ProductsDialogBodyProps = {
 
 const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: ProductsDialogBodyProps) => {
   const toggle = useToggle()
-  const { control, handleSubmit, formState: { isValid } } = useFormContext<ProductSchemaType>()
+  const { control, handleSubmit, formState: { isValid }, setValue, getValues } = useFormContext<ProductSchemaType>()
   const mainTags = tags.filter((tags:TagsType) => !tags.id_main_tag)
   const childrenTags = tags.filter((tags:TagsType) => tags.id_main_tag)
+  let childrenTagsOptions = []
+  let mainTagsOptions = []
 
-  const mainTagsOptions = mainTags.map(
+  mainTagsOptions = mainTags.map(
     (tag: TagsType) => ({
       value: tag.name.toLowerCase(),
       label: tag.name,
     }),
   );
-  const childrenTagsOptions = childrenTags.map((tag: TagsType) => ({
-    value: tag.name.toLowerCase(),
-    label: tag.name,
-  }));
   const tagsOptions = mainTags.map(
     (tag: TagsType) => ({
       value: tag.name.toLowerCase(),
@@ -46,6 +44,17 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
 
   const toggleComboboxCategory = useToggle()
   const toggleComboboxCategoryChildren = useToggle()
+  
+  const onChangeMainTag = (value: string) => {
+    const productsTags = getValues("TAGS")
+    // const isThereMainTag = productsTags.find((tag: TagsType) => !tag.id_main_tag)
+    setValue("TAGS", [])
+  }
+
+  useEffect(()=> {
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[])
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={toggle.onClose}>
@@ -142,7 +151,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
             />
             <FormField 
               control={control}
-              name="PRODUCTS_TAG"
+              name="TAGS"
               render={({ field }) => {
                 return (
                   <FormItem className='mt-3'>
@@ -172,7 +181,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                             <CommandInput placeholder="Buscar categoria..." />
                             <CommandList>
                               <CommandEmpty>
-                                Categorias no encontradas
+                                Categorias no encontnradas
                               </CommandEmpty>
                               <CommandGroup>
                                 {mainTagsOptions.map((tag) => (
@@ -207,7 +216,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
             />
                         <FormField 
               control={control}
-              name="PRODUCTS_TAG"
+              name="TAGS"
               render={({ field }) => {
                 return (
                   <FormItem className='mt-3'>

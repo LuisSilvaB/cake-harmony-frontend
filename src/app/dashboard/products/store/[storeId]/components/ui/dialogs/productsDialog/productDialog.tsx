@@ -1,24 +1,24 @@
 import React from "react";
-import ProductsDialogBody from "@/app/dashboard/products/components/ui/dialogs/productsDialog/productDialogBody/productDialogBody";
+import ProductsDialogBody from "@/app/dashboard/products/store/[storeId]/components/ui/dialogs/productsDialog/productDialogBody/productDialogBody";
 import { productsType } from "@/app/dashboard/globalProducts/types/globalProducts.type";
-import { ProductSchema, ProductSchemaType } from "@/app/dashboard/products/schema/product.schema";
+import { ProductSchema, ProductSchemaType } from "@/app/dashboard/products/store/[storeId]/schema/product.schema";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TagsType } from "@/app/dashboard/tags/types/tags.type";
 
 interface ProductDialogProps {
   product?: productsType;
-  tags:TagsType[]; 
-  loadingTags:boolean;
+  tags?:TagsType[]; 
+  loadingTags?:boolean;
 }
 
-const ProductDialog = ({ product, tags, loadingTags }: ProductDialogProps) => {
+const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialogProps) => {
   const defaultValues: ProductSchemaType = {
     id: 0,
     name: "",
     description: "",
     image_url: [],
-    PRODUCTS_TAG: [],
+    TAGS: [],
     PRODUCT_VARIANTS: [],
   }
 

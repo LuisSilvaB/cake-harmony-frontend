@@ -8,6 +8,7 @@ import ProductDialog from '../dialogs/productsDialog';
 import useToggle from '@/hooks/useToggle.hook';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
+import { TagsType } from '@/app/dashboard/tags/types/tags.type';
 
 type productsTableProps = {
   globalProducts: productsType[]
@@ -51,19 +52,22 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
       header: "CATEGORÍA",
       cell: (info) => (
         <div>
-          {info.getValue().map((tag: productsTagsType, index: number) => (
-            <div key={index}>
-              {tag.type === "CATEGORY" ? (
+          {
+            info.getValue().map((tag: TagsType, index: number) => {
+              console.log(tag)
+              if(!tag.id_main_tag) return (<div key = {index}>
                 <Badge
                   style={{
-                    backgroundColor: tag.TAG.color,
+                    backgroundColor: tag.color,
                   }}
                 >
-                  {tag.TAG.name}
-                </Badge>
-              ) : null}
-            </div>
-          ))}
+                  {tag.name}  
+                  </Badge>
+              </div>)
+              return null
+            })
+          }
+
         </div>
       ),
     }),
@@ -71,19 +75,24 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
       header: "SUB CATEGORÍAS",
       cell: (info) => (
         <div>
-          {info.getValue().map((tag: productsTagsType, index: number) => (
-            <div key={index}>
-              {tag.type === "SUB-CATEGORY" ? (
-                <Badge
-                  style={{
-                    backgroundColor: tag.TAG.color,
-                  }}
-                >
-                  {tag.TAG.name}
-                </Badge>
-              ) : null}
-            </div>
-          ))}
+          {info.getValue().map((tag: TagsType, index: number) => {
+              console.log(tag)
+            
+            if (tag.id_main_tag)
+              return (
+                <div key={index}>
+                  <Badge
+                    style={{
+                      backgroundColor: tag.color,
+                    }}
+                  >
+                    {tag.name}
+                  </Badge>
+                </div>
+              );
+              return null
+          } 
+          )}
         </div>
       ),
     }),
@@ -102,7 +111,7 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
     }),
     columnHelper.accessor("id", {
       header: "Acciones",
-      cell: (info) => <ProductDialog product={info.row.original} />,
+      // cell: (info) => <ProductDialog product={info.row.original} />,
     }),
   ];
 

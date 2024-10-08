@@ -1,5 +1,5 @@
 "use client"
-import React from 'react'
+import React, { useEffect } from 'react'
 import { AppDispatch, RootState } from '@/redux/store'
 import { useDispatch, useSelector } from 'react-redux'
 import useToggle from '@/hooks/useToggle.hook'
@@ -32,8 +32,7 @@ const StoreSubsidiaryDialog = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { selectedStore, stores, loading: storeLoading } = useSelector((state: RootState) => state.store)
   const { selectedSubsidiary, subsidiaries, loading: subsidiaryLoading } = useSelector((state: RootState) => state.subsidiary)
-
-  const toggle = useToggle(!selectedStore && !selectedSubsidiary)
+  const toggle = useToggle(false)
   
   const onChangeStore = async (e:any) => {
     const store = stores.find((store) => store.name === e)
@@ -99,9 +98,6 @@ const StoreSubsidiaryDialog = () => {
                         <SelectItem
                           key={store.id}
                           value={store?.name ?? ""}
-                          onChange={(e) => {
-                            console.log(e);
-                          }}
                         >
                           {store.name}
                         </SelectItem>
@@ -162,4 +158,4 @@ const StoreSubsidiaryDialog = () => {
   );
 }
 
-export default StoreSubsidiaryDialog
+export default StoreSubsidiaryDialog;

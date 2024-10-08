@@ -4,20 +4,10 @@ import ProductTable from '../../ui/productsTable'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/redux/store'
 import { FaSpinner } from 'react-icons/fa'
-import { getAllProducts, getProductBySubsidiaryId } from '../../../feature/products.feature'
-import { Button } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
 
 const ProductsBody = () => {
-  const dispatch = useDispatch<AppDispatch>()
   const { products, loadingProducts } = useSelector((state: RootState) => state.products)
-  const { selectedProduct } = useSelector((state: RootState) => state.products)
-  const selectedStore = useSelector((state: RootState) => state.store.selectedStore)
-
-  useEffect(() => {
-    dispatch(getAllProducts())
-  }, [dispatch])
-
+  console.log(products)
   if (loadingProducts)
     return (
       <div className="flex h-full w-full items-center justify-center">

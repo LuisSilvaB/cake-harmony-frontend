@@ -7,6 +7,26 @@ import { productsType } from '../types/products.type'
 
 const supabase = createSupabaseBrowserClient()
 
+export const getAllProductsByStoreId = createAsyncThunk(
+  "products/getAllProductsByStoreIdProducts", 
+  async ({ storeId }: { storeId: number }) => {
+    const { data, error } = await supabase
+      .from("PRODUCTS_STORE")
+      .select("PRODUCT(*, PRODUCTS_TAG(TAG(*)),PRODUCT_VARIANTS(*))")
+      .eq("STORE_ID", storeId);
+    
+    if (error && !data) {
+      toast({
+        title: "Error",
+        description: "Hubo un error al obtener los productos Productses",
+        duration: 2000,
+        variant: "destructive"
+      })
+    }
+    return data as any[] ?? []
+  }
+)
+
 export const getAllProducts = createAsyncThunk(
   "products/getAllProductsProducts", 
   async () => {
@@ -127,14 +147,23 @@ const productsSlice = createSlice({
     }
   }, 
   extraReducers: (builder) => {
-    builder.addCase(getAllProducts.pending, (state, action) => {
+    builder.addCase(getAllProductsByStoreId.pending, (state, action) => {
       state.loadingProducts = true
     })
-    builder.addCase(getAllProducts.fulfilled, (state, action) => {
-      state.products = action.payload
+    builder.addCase(getAllProductsByStoreId.fulfilled, (state, action) => {
+      const formatedData = action.payload?.map((product: any) => {
+        const productTags = product.PRODUCT.PRODUCTS_TAG?.map((tag: any) => tag.TAG) || []; 
+        const productVariants = product.PRODUCT.PRODUCT_VARIANTS?.map((variant: any) => variant) || []; 
+        return {
+          ...product.PRODUCT,
+          PRODUCTS_TAG: productTags,
+          PRODUCT_VARIANTS: productVariants,
+        };
+      });
+      state.products = formatedData
       state.loadingProducts = false
     })
-    builder.addCase(getAllProducts.rejected, (state, action) => {
+    builder.addCase(getAllProductsByStoreId.rejected, (state, action) => {
       state.loadingProducts = false
     })  
     builder.addCase(onSearchProducts.pending, (state, action) => {

@@ -1,17 +1,31 @@
 "use client"
-import React, { lazy } from 'react'
-import ProductsLayout from './layout';
-import ProductsHeader from '../tags/components/layout/tagsHeader/productsHeader';
+import React, { useEffect } from 'react'
+import Layout from './layout';
+import { lazy } from 'react';
+import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
 
-const ProductsPage = () => {
-  const ProductsBody = lazy(() => import('./components/layout/productsBody'));
+// Cargar el componente de forma diferida
+const Body = lazy(() => import('./components/layout/body'));
+
+const SubsidiariesPage = () => {
+  const router = useRouter();
+  const storesSelector = useSelector((state: RootState) => state.store);
+
+  useEffect(() => {
+    if (storesSelector.selectedStore?.id) {
+      router.push(`/dashboard/products/store/${storesSelector.selectedStore?.id}`);
+    }
+    
+  }, [storesSelector.selectedStore, router]);
+
 
   return (
-    <ProductsLayout>
-      <ProductsHeader />
-      <ProductsBody />
-    </ProductsLayout>
-  );
+    <Layout>
+      <Body />
+    </Layout>
+  )
 }
 
-export default ProductsPage
+export default SubsidiariesPage
