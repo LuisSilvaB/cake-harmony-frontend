@@ -1,23 +1,52 @@
 import { productsType } from '@/app/dashboard/globalProducts/types/globalProducts.type'
 import { ProductSchemaType } from '@/app/dashboard/products/schema/product.schema'
+import { TagsType } from '@/app/dashboard/tags/types/tags.type'
 import { Button, Input } from '@/components/ui'
-import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
+import { DialogContent, Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import Icon from '@/components/ui/icon'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import useToggle from '@/hooks/useToggle.hook'
-import { Dialog } from '@radix-ui/react-dialog'
+import { cn } from '@/utils/cn'
+import { Check, ChevronsUpDown } from 'lucide-react'
 import React from 'react'
 import { useFormContext } from 'react-hook-form'
 
 type ProductsDialogBodyProps = {
-  product?: productsType
+  product?: productsType; 
+  tags:TagsType[]; 
+  loadingTags:boolean;
 }
 
-const ProductsDialogBody = ( { product }: ProductsDialogBodyProps) => {
+const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: ProductsDialogBodyProps) => {
   const toggle = useToggle()
   const { control, handleSubmit, formState: { isValid } } = useFormContext<ProductSchemaType>()
+  const mainTags = tags.filter((tags:TagsType) => !tags.id_main_tag)
+  const childrenTags = tags.filter((tags:TagsType) => tags.id_main_tag)
+
+  const mainTagsOptions = mainTags.map(
+    (tag: TagsType) => ({
+      value: tag.name.toLowerCase(),
+      label: tag.name,
+    }),
+  );
+  const childrenTagsOptions = childrenTags.map((tag: TagsType) => ({
+    value: tag.name.toLowerCase(),
+    label: tag.name,
+  }));
+  const tagsOptions = mainTags.map(
+    (tag: TagsType) => ({
+      value: tag.name.toLowerCase(),
+      label: tag.name,
+    }),
+  );
+
+  const toggleComboboxCategory = useToggle()
+  const toggleComboboxCategoryChildren = useToggle()
+
   return (
     <Dialog open={toggle.isOpen} onOpenChange={toggle.onClose}>
       <TooltipProvider>
@@ -111,7 +140,136 @@ const ProductsDialogBody = ( { product }: ProductsDialogBodyProps) => {
                 </FormItem>
               )}
             />
-            
+            <FormField 
+              control={control}
+              name="PRODUCTS_TAG"
+              render={({ field }) => {
+                return (
+                  <FormItem className='mt-3'>
+                    <FormLabel>Categorías</FormLabel>
+                    <FormControl>
+                      <Popover
+                        open={toggleComboboxCategory.isOpen}
+                        onOpenChange={toggleComboboxCategory.onToggle}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                          >
+                            Seleccione una categoria
+                            {/* {
+                          field.value
+                          ? mainTags.find((mainTag)=> mainTag.id === field.value)?.name
+                          : "Seleccione una categoria"
+                        } */}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar categoria..." />
+                            <CommandList>
+                              <CommandEmpty>
+                                Categorias no encontradas
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {mainTagsOptions.map((tag) => (
+                                  <CommandItem
+                                    key={tag.value}
+                                    value={tag.value}
+                                    onSelect={(currentValue) => {
+                                      // setValue("id_main_tag", mainTags.find((mainTag)=> mainTag.name.toLowerCase() === currentValue)?.id ?? 0);
+                                      toggleComboboxCategory.onClose();
+                                    }}
+                                  >
+                                    {/* <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  tags.find((mainTag)=> mainTag.name.toLowerCase() === tag.value.toLowerCase())?.id === field.value 
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              /> */}
+                                    {tag.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                  </FormItem>
+                );
+              }}
+            />
+                        <FormField 
+              control={control}
+              name="PRODUCTS_TAG"
+              render={({ field }) => {
+                return (
+                  <FormItem className='mt-3'>
+                    <FormLabel>Subcategorías</FormLabel>
+                    <FormControl>
+                      <Popover
+                        open={toggleComboboxCategoryChildren.isOpen}
+                        onOpenChange={toggleComboboxCategoryChildren.onToggle}
+                      >
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            className="w-full justify-between"
+                          >
+                            Seleccione una subcategoria
+                            {/* {
+                          field.value
+                          ? mainTags.find((mainTag)=> mainTag.id === field.value)?.name
+                          : "Seleccione una categoria"
+                        } */}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="start">
+                          <Command>
+                            <CommandInput placeholder="Buscar categoria..." />
+                            <CommandList>
+                              <CommandEmpty>
+                                Subcategorías no encontradas
+                              </CommandEmpty>
+                              <CommandGroup>
+                                {mainTagsOptions.map((tag) => (
+                                  <CommandItem
+                                    key={tag.value}
+                                    value={tag.value}
+                                    onSelect={(currentValue) => {
+                                      // setValue("id_main_tag", mainTags.find((mainTag)=> mainTag.name.toLowerCase() === currentValue)?.id ?? 0);
+                                      toggleComboboxCategoryChildren.onClose();
+                                    }}
+                                  >
+                                    {/* <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  tags.find((mainTag)=> mainTag.name.toLowerCase() === tag.value.toLowerCase())?.id === field.value 
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              /> */}
+                                    {tag.label}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                    </FormControl>
+                  </FormItem>
+                );
+              }}
+            />
           </div>
         </form>
       </DialogContent>

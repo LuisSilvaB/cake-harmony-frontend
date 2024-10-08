@@ -4,12 +4,15 @@ import { productsType } from "@/app/dashboard/globalProducts/types/globalProduct
 import { ProductSchema, ProductSchemaType } from "@/app/dashboard/products/schema/product.schema";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { TagsType } from "@/app/dashboard/tags/types/tags.type";
 
 interface ProductDialogProps {
   product?: productsType;
+  tags:TagsType[]; 
+  loadingTags:boolean;
 }
 
-const ProductDialog = ({ product }: ProductDialogProps) => {
+const ProductDialog = ({ product, tags, loadingTags }: ProductDialogProps) => {
   const defaultValues: ProductSchemaType = {
     id: 0,
     name: "",
@@ -27,7 +30,7 @@ const ProductDialog = ({ product }: ProductDialogProps) => {
   });
   return (
     <FormProvider {...formMethods}>
-      <ProductsDialogBody product={product} />
+      <ProductsDialogBody tags={tags} loadingTags={loadingTags} product={product} />
     </FormProvider>
   );
 };

@@ -74,7 +74,7 @@ export const getPermissionsByUserIdFeature = createAsyncThunk(
 
     const permissions: PermissionType[] = permissionsData?.ROL_PERMISSION?.flatMap(rp => rp.PERMISSION) || [];
     localStorage.setItem("permissions", JSON.stringify(permissions));
-
+    Cookies.set("permissions", permissions.toString());
     return {
       rol: {
         id: permissionsData.id,

@@ -21,6 +21,7 @@ const PermissionsLoader = () => {
   const [loader, setLoader] = useState<ReactNode | null>(<PermissionsCustomLoader />);
 
   const clearStorageAndRedirect = () => {
+    setLoader(null);
     localStorage.clear();
     Cookies.remove('user-auth-access-token');
     router.push('/auth/login');
