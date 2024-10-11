@@ -34,9 +34,9 @@ const DialogContent = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { size?: 'medium' | 'large' | 'short' }
 >(({ className, children, size = 'medium', ...props }, ref) => {
   const sizeClasses = {
-    medium: 'max-w-md h-auto',
-    large: 'max-w-xl h-auto', 
-    short: 'max-w-sm h-[200px]', 
+    medium: 'max-w-md max-h-[600px]!important overflow-y-auto',
+    large: 'max-w-xl max-h-[600px]!important overflow-y-auto', 
+    short: 'max-w-sm max-h-[200px]!important overflow-y-auto', 
   }
   return (
     <DialogPortal>

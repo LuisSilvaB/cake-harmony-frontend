@@ -38,13 +38,12 @@ export type productsTagsType = {
   PRODUCT_ID: string;
 }
 
-export type productsVariantsType = {
-  id: number;
-  created_at: Date;
-  PRODUCT_ID: string;
-  size: string;
-  sku: string;
-  stock: number;
+export type variantsType = {
+  id?: number;
+  created_at?: string;
+  PRODUCT_ID?: number;
+  presentation?: string;
+  unid?: string;
 }
 
 export type productsType = {
@@ -54,7 +53,7 @@ export type productsType = {
   brand: string;
   image_url: Array<string>;
   PRODUCTS_TAG: Array<TagsType>;  
-  PRODUCT_VARIANTS: Array<productsVariantsType>;
+  VARIANTS: Array<variantsType>;
 }
 
 

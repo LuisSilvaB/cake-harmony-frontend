@@ -21,7 +21,7 @@ export type productsType = {
     created_at: string;
     PRODUCT_ID: string;
   }>;
-  PRODUCT_VARIANTS: Array<{
+  VARIANTS: Array<{
     PRODUCT_ID: string;
     created_at: Date;
     id: number;
@@ -39,7 +39,7 @@ export type productsTagsType = {
   PRODUCT_ID: string;
 }
 
-export type productsVariantsType = {
+export type variantsType = {
   PRODUCT_ID: string;
   created_at: Date;
   id: number;

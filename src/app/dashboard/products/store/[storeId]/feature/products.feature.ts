@@ -12,7 +12,7 @@ export const getAllProductsByStoreId = createAsyncThunk(
   async ({ storeId }: { storeId: number }) => {
     const { data, error } = await supabase
       .from("PRODUCTS_STORE")
-      .select("PRODUCT(*, PRODUCTS_TAG(TAG(*)),PRODUCT_VARIANTS(*))")
+      .select("PRODUCT(*, PRODUCTS_TAG(TAG(*)),VARIANTS(*))")
       .eq("STORE_ID", storeId);
     
     if (error && !data) {
@@ -34,7 +34,7 @@ export const getAllProducts = createAsyncThunk(
       `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*)
+        VARIANTS(*)
       `,
       //PRODUCT STORE -> LA RALACION CON PRODUCT STORE
       //EN LAS VARIANTES TRAER LA RELACIÓN CON LA SUCURSAL
@@ -64,7 +64,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
       `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*)
+        VARIANTS(*)
       `,
     );
     const { data, error } = await supabase
@@ -73,7 +73,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
         `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*), 
+        VARIANTS(*), 
         SUBSIDIARY_PRODUCT_VARIANTS(*)
       `,
       )
@@ -153,11 +153,11 @@ const productsSlice = createSlice({
     builder.addCase(getAllProductsByStoreId.fulfilled, (state, action) => {
       const formatedData = action.payload?.map((product: any) => {
         const productTags = product.PRODUCT.PRODUCTS_TAG?.map((tag: any) => tag.TAG) || []; 
-        const productVariants = product.PRODUCT.PRODUCT_VARIANTS?.map((variant: any) => variant) || []; 
+        const productVariants = product.PRODUCT.VARIANTS?.map((variant: any) => variant) || []; 
         return {
           ...product.PRODUCT,
           PRODUCTS_TAG: productTags,
-          PRODUCT_VARIANTS: productVariants,
+          VARIANTS: productVariants,
         };
       });
       state.products = formatedData

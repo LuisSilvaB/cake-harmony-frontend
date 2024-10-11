@@ -18,8 +18,10 @@ const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialo
     name: "",
     description: "",
     image_url: [],
+    images_files: [],
+    MAIN_TAG: [], 
     TAGS: [],
-    PRODUCT_VARIANTS: [],
+    VARIANTS: [],
   }
 
   const formMethods = useForm<ProductSchemaType>({

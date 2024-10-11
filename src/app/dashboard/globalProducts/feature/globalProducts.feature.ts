@@ -13,7 +13,7 @@ export const getAllProducts = createAsyncThunk(
       `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*)
+        VARIANTS(*)
       `,
       //PRODUCT STORE -> LA RALACION CON PRODUCT STORE
       //EN LAS VARIANTES TRAER LA RELACIÓN CON LA SUCURSAL
@@ -43,7 +43,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
       `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*)
+        VARIANTS(*)
       `,
     );
     const { data, error } = await supabase
@@ -52,12 +52,12 @@ export const getProductBySubsidiaryId = createAsyncThunk(
         `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        PRODUCT_VARIANTS(*), 
-        SUBSIDIARY_PRODUCT_VARIANTS(*)
+        VARIANTS(*), 
+        SUBSIDIARY_VARIANTS(*)
       `,
       )
       .eq("id", productId)
-      .eq("PRODUCT.SUBSIDIARY_PRODUCT_VARIANTS.SUBSIDIARY_ID", subsidiaryId)
+      .eq("PRODUCT.SUBSIDIARY_VARIANTS.SUBSIDIARY_ID", subsidiaryId)
       .single(); 
       
     // if (error && !data) {

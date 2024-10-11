@@ -54,7 +54,6 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
         <div>
           {
             info.getValue().map((tag: TagsType, index: number) => {
-              console.log(tag)
               if(!tag.id_main_tag) return (<div key = {index}>
                 <Badge
                   style={{
@@ -76,7 +75,6 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
       cell: (info) => (
         <div>
           {info.getValue().map((tag: TagsType, index: number) => {
-              console.log(tag)
             
             if (tag.id_main_tag)
               return (
