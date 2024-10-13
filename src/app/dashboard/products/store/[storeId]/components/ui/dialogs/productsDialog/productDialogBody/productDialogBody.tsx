@@ -4,7 +4,7 @@ import { TagsType } from '@/app/dashboard/tags/types/tags.type'
 import { Button, Input, Label } from '@/components/ui'
 import { Badge } from '@/components/ui/badge'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { DialogContent, Dialog, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { DialogContent, Dialog, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import Icon from '@/components/ui/icon'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -12,7 +12,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import useToggle from '@/hooks/useToggle.hook'
 import { Check, ChevronsUpDown } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { FieldErrors, SubmitHandler, useFormContext } from 'react-hook-form'
 import { variantsType } from '../../../../../types/products.type'
 import { uploadFile } from '@/libs/supabase/s3'
 import { useSelector } from 'react-redux'
@@ -179,13 +179,31 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
     return
   }
     setValue("images_files", [...images_files, file]);
-    console.log(watch("images_files"));
-    // if(!selectedStore) return;
-    // const data = await uploadFile(file, `stores/${selectedStore?.id}/products/${file.name}`);
-    // if (!data) return;
-    // const image_url = getValues("image_url") ?? [];
-    // setValue("image_url",[...image_url, data.fullPath]);
-    // console.log(data);
+  }
+
+  const onCreateProduct: SubmitHandler<
+    Omit<ProductSchemaType, "id" | "created_at">
+  > = async (data) => {
+    try {
+      if (isValid) {
+        console.log(data);
+      }
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el product",
+      });
+      return;
+    }
+  }; 
+
+  const onError = (error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>) => {
+    toast({
+      title: "Vefifique los campos ingresados",
+      description: "Error al registrar",
+      duration: 5000,
+      variant: "destructive"
+    });
   }
 
   
@@ -231,8 +249,10 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
           </Tooltip>
         )}
       </TooltipProvider>
-      <DialogContent size="large" className="mt-4 overflow-y-auto">
-        <form>
+      <DialogContent
+        size="large"
+        className="mt-10 box-border border p-4 top-[45%]"
+      >
           <DialogHeader>
             <DialogTitle>
               {product ? "Editar Producto" : "Agregar un Producto"}
@@ -243,6 +263,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 : "Registre los datos correspondientes a tu Producto."}
             </DialogDescription>
           </DialogHeader>
+        <form className='max-h-[55vh] overflow-y-auto p-2'>
           <div>
             <div className="flex grow flex-row gap-2">
               <FormField
@@ -447,7 +468,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                         <Input
                           key={index}
                           type="text"
-                          placeholder="Presentación"
+                          placeholder="Nombre de variable"
                           className="min-w-56 border"
                           value={variant.presentation}
                           onChange={(e) => {
@@ -500,7 +521,10 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
               {watch("images_files") && watch("images_files")?.length
                 ? watch("images_files")?.map((image: File, index: number) => (
                     <div key={index} className="relative">
-                      <div onClick={()=> onDeleteImage(index)} className="absolute -right-2 -top-2 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100">
+                      <div
+                        onClick={() => onDeleteImage(index)}
+                        className="absolute -right-2 -top-2 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100"
+                      >
                         <Icon
                           remixIconClass="ri-close-circle-fill"
                           color="red"
@@ -523,26 +547,11 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                   ))
                 : null}
             </div>
-            {/* {
-              watch("image_url") && watch("image_url")?.length
-              ? watch("image_url")?.map((image: any, index: number) => (
-                  <div className="flex flex-row gap-2" key={index}>
-                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${image}`} alt='product' className="w-20 h-20 rounded-lg" />
-                    <div
-                      // onClick={() => onDeleteImage(index)}
-                      className="hover:bg-light-gray cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200 hover:text-black"
-                    >
-                      <Icon
-                        remixIconClass="ri-close-line"
-                        size="xs"
-                        color="white"
-                      />
-                    </div>
-                  </div>
-                )): null
-            } */}
           </div>
         </form>
+        <DialogFooter className="w-full bg-white">
+          <Button>Crear producto</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
