@@ -147,12 +147,15 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
 
   const uploadImage = async (e: any) => {
     const file = e.target.files[0];
-    if(!selectedStore) return;
-    const data = await uploadFile(file, `stores/${selectedStore?.id}/products/${file.name}`);
-    if (!data) return;
-    const image_url = getValues("image_url") ?? [];
-    setValue("image_url",[...image_url, data.fullPath]);
-    console.log(data);
+    const images_files = watch("images_files") ?? [];
+    setValue("images_files", [...images_files, file]);
+    console.log(watch("images_files"));
+    // if(!selectedStore) return;
+    // const data = await uploadFile(file, `stores/${selectedStore?.id}/products/${file.name}`);
+    // if (!data) return;
+    // const image_url = getValues("image_url") ?? [];
+    // setValue("image_url",[...image_url, data.fullPath]);
+    // console.log(data);
   }
 
   
@@ -198,7 +201,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
           </Tooltip>
         )}
       </TooltipProvider>
-      <DialogContent size='large' className="mt-4 overflow-y-auto">
+      <DialogContent size="large" className="mt-4 overflow-y-auto">
         <form>
           <DialogHeader>
             <DialogTitle>
@@ -211,200 +214,206 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
             </DialogDescription>
           </DialogHeader>
           <div>
-            <FormField
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={field.value}
-                      onChange={field.onChange}
-                      type="text"
-                      placeholder="Nombre"
-                      className="min-w-56 border"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Input
-                      value={field.value}
-                      onChange={field.onChange}
-                      type="text"
-                      placeholder="Descripción"
-                      className="min-w-56 border"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={control}
-              name="TAGS"
-              render={({ field }) => {
-                return (
-                  <FormItem className="mt-3">
-                    <FormLabel>Categorías</FormLabel>
+            <div className="flex grow flex-row gap-2">
+              <FormField
+                control={control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre</FormLabel>
                     <FormControl>
-                      <Popover
-                        open={toggleComboboxCategory.isOpen}
-                        onOpenChange={toggleComboboxCategory.onToggle}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className="w-full justify-between"
-                          >
-                            Seleccione una categoria
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar categoria..." />
-                            <CommandList>
-                              <CommandEmpty>
-                                Categorias no encontnradas
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {mainTagsOptions.map((tag) => (
-                                  <CommandItem
-                                    key={tag.value}
-                                    value={tag.value}
-                                    onSelect={(currentValue) => {
-                                      onChangeMainTag(currentValue);
-                                      toggleComboboxCategory.onClose();
-                                    }}
-                                  >
-                                    {tag.label}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        type="text"
+                        placeholder="Nombre"
+                        className="min-w-56 border"
+                      />
                     </FormControl>
-                    {getValues("MAIN_TAG").length
-                      ? getValues("MAIN_TAG").map((tag: any, index: number) => (
-                          <Badge
-                            key={index}
-                            style={{
-                              backgroundColor: tag.color,
-                            }}
-                            className="flex w-fit flex-row gap-2"
-                          >
-                            <span>{tag.name}</span>
-                            <div
-                              onClick={onDeleteMainTag}
-                              className="cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200"
-                            >
-                              <Icon
-                                remixIconClass="ri-close-line"
-                                size="xs"
-                                color="white"
-                              />
-                            </div>
-                          </Badge>
-                        ))
-                      : null}
+                    <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={control}
-              name="TAGS"
-              render={({ field }) => {
-                return (
-                  <FormItem className="mt-3">
-                    <FormLabel>Subcategorías</FormLabel>
+                )}
+              />
+              <FormField
+                control={control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descripción</FormLabel>
                     <FormControl>
-                      <Popover
-                        open={toggleComboboxCategoryChildren.isOpen}
-                        onOpenChange={toggleComboboxCategoryChildren.onToggle}
-                      >
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            className="w-full justify-between"
-                          >
-                            Seleccione una subcategoria
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent align="start">
-                          <Command>
-                            <CommandInput placeholder="Buscar categoria..." />
-                            <CommandList>
-                              <CommandEmpty>
-                                Subcategorías no encontradas
-                              </CommandEmpty>
-                              <CommandGroup>
-                                {childrenTagsOptions.map((tag) => (
-                                  <CommandItem
-                                    key={tag.value} 
-                                    value={tag.value}
-                                    onSelect={(currentValue) => {
-                                      onChangeTag(currentValue);
-                                      toggleComboboxCategoryChildren.onClose();
-                                    }}
-                                  >
-                                    {tag.label}
-                                  </CommandItem>
-                                ))}
-                              </CommandGroup>
-                            </CommandList>
-                          </Command>
-                        </PopoverContent>
-                      </Popover>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        type="text"
+                        placeholder="Descripción"
+                        className="min-w-56 border"
+                      />
                     </FormControl>
-                    {getValues("TAGS").length
-                      ? getValues("TAGS").map((tag: any, index: number) => (
-                          <Badge
-                            key={index}
-                            style={{
-                              backgroundColor: tag.color,
-                            }}
-                            className="flex w-fit flex-row gap-2"
-                          >
-                            <span>{tag.name}</span>
-                            <div
-                              onClick={() => onDeleteTag(tag.id)}
-                              className="hover:bg-light-gray cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200 hover:text-black"
-                            >
-                              <Icon
-                                remixIconClass="ri-close-line"
-                                size="xs"
-                                color="white"
-                              />
-                            </div>
-                          </Badge>
-                        ))
-                      : null}
+                    <FormMessage />
                   </FormItem>
-                );
-              }}
-            />
+                )}
+              />
+            </div>
+            <div className="flex grow flex-row gap-2">
+              <FormField
+                control={control}
+                name="TAGS"
+                render={({ field }) => {
+                  return (
+                    <FormItem className="mt-3 flex-1">
+                      <FormLabel>Categorías</FormLabel>
+                      <FormControl>
+                        <Popover
+                          open={toggleComboboxCategory.isOpen}
+                          onOpenChange={toggleComboboxCategory.onToggle}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full justify-between"
+                            >
+                              opciones
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar categoria..." />
+                              <CommandList>
+                                <CommandEmpty>
+                                  Categorias no encontnradas
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {mainTagsOptions.map((tag) => (
+                                    <CommandItem
+                                      key={tag.value}
+                                      value={tag.value}
+                                      onSelect={(currentValue) => {
+                                        onChangeMainTag(currentValue);
+                                        toggleComboboxCategory.onClose();
+                                      }}
+                                    >
+                                      {tag.label}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                      {getValues("MAIN_TAG").length
+                        ? getValues("MAIN_TAG").map(
+                            (tag: any, index: number) => (
+                              <Badge
+                                key={index}
+                                style={{
+                                  backgroundColor: tag.color,
+                                }}
+                                className="flex w-fit flex-row gap-2"
+                              >
+                                <span>{tag.name}</span>
+                                <div
+                                  onClick={onDeleteMainTag}
+                                  className="cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200"
+                                >
+                                  <Icon
+                                    remixIconClass="ri-close-line"
+                                    size="xs"
+                                    color="white"
+                                  />
+                                </div>
+                              </Badge>
+                            ),
+                          )
+                        : null}
+                    </FormItem>
+                  );
+                }}
+              />
+              <FormField
+                control={control}
+                name="TAGS"
+                render={({ field }) => {
+                  return (
+                    <FormItem className="mt-3 flex-1">
+                      <FormLabel>Subcategorías</FormLabel>
+                      <FormControl>
+                        <Popover
+                          open={toggleComboboxCategoryChildren.isOpen}
+                          onOpenChange={toggleComboboxCategoryChildren.onToggle}
+                        >
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              className="w-full justify-between"
+                            >
+                              opciones
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent align="start">
+                            <Command>
+                              <CommandInput placeholder="Buscar categoria..." />
+                              <CommandList>
+                                <CommandEmpty>
+                                  Subcategorías no encontradas
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {childrenTagsOptions.map((tag) => (
+                                    <CommandItem
+                                      key={tag.value}
+                                      value={tag.value}
+                                      onSelect={(currentValue) => {
+                                        onChangeTag(currentValue);
+                                        toggleComboboxCategoryChildren.onClose();
+                                      }}
+                                    >
+                                      {tag.label}
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                      </FormControl>
+                      {getValues("TAGS").length
+                        ? getValues("TAGS").map((tag: any, index: number) => (
+                            <Badge
+                              key={index}
+                              style={{
+                                backgroundColor: tag.color,
+                              }}
+                              className="flex w-fit flex-row gap-2"
+                            >
+                              <span>{tag.name}</span>
+                              <div
+                                onClick={() => onDeleteTag(tag.id)}
+                                className="hover:bg-light-gray cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200 hover:text-black"
+                              >
+                                <Icon
+                                  remixIconClass="ri-close-line"
+                                  size="xs"
+                                  color="white"
+                                />
+                              </div>
+                            </Badge>
+                          ))
+                        : null}
+                    </FormItem>
+                  );
+                }}
+              />
+            </div>
             <Label>Variantes</Label>
-            <div className='flex flex-col mt-2 mb-2 gap-2'>
+            <div className="mb-2 mt-2 flex flex-col gap-2">
               {watch("VARIANTS") && watch("VARIANTS")?.length
                 ? watch("VARIANTS")?.map(
                     (variant: variantsType, index: number) => (
-                      <div className = "flex flex-row gap-2" key={index}>                        
+                      <div className="flex flex-row gap-2" key={index}>
                         <Input
                           key={index}
                           type="text"
@@ -415,8 +424,16 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                             onChangeVariantValue(index, e.target.value);
                           }}
                         />
-                        <Button size = "xs" variant="destructive" onClick={(e) => onDeleteVariant(e, index)}>
-                          <Icon remixIconClass="ri-delete-bin-line" size="xs" color="white" />
+                        <Button
+                          size="xs"
+                          variant="destructive"
+                          onClick={(e) => onDeleteVariant(e, index)}
+                        >
+                          <Icon
+                            remixIconClass="ri-delete-bin-line"
+                            size="xs"
+                            color="white"
+                          />
                         </Button>
                       </div>
                     ),
@@ -440,13 +457,28 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                   <FormItem>
                     <FormLabel>Imagenes</FormLabel>
                     <FormControl>
-                      <Input type="file" {...field} onChange={uploadImage} />
+                      <Input type="file" onChange={uploadImage} />
                     </FormControl>
                   </FormItem>
                 );
               }}
             />
-            {
+            <div className='flex flex-row gap-2 rounded-lg flex-wrap mt-2'>
+              {watch("images_files") && watch("images_files")?.length
+                ? watch("images_files")?.map((image: File, index: number) => (
+                    <div key={index} className='relative' >
+                      <div className='absolute -top-2 -right-2  border px-1 bg-white rounded-full opacity-70 hover:opacity-100 cursor-pointer transition-all ease-in-out'>
+                        <Icon remixIconClass='ri-close-circle-fill' color='red' className='hover:text-red-900' />
+                      </div>
+                      <div className='absolute -top-2 right-6  border px-1 bg-white rounded-full opacity-70 hover:opacity-100 cursor-pointer transition-all ease-in-out'>
+                        <Icon remixIconClass='ri-eye-fill' color='blue' className='hover:text-red-900' />
+                      </div>
+                      <img src={URL.createObjectURL(image)} alt="product image" className='max-w-30 h-20 border rounded-lg shadow-xl' />
+                    </div>
+                  ))
+                : null}
+            </div>
+            {/* {
               watch("image_url") && watch("image_url")?.length
               ? watch("image_url")?.map((image: any, index: number) => (
                   <div className="flex flex-row gap-2" key={index}>
@@ -463,8 +495,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                     </div>
                   </div>
                 )): null
-            }
-            
+            } */}
           </div>
         </form>
       </DialogContent>

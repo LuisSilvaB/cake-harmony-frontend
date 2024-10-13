@@ -64,7 +64,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
       `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        VARIANTS(*)
+        PRODUCT_VARIANTS(*)
       `,
     );
     const { data, error } = await supabase
@@ -73,7 +73,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
         `
         *,
         PRODUCTS_TAG(*, TAG(*)),
-        VARIANTS(*), 
+        PRODUCT_VARIANTS(*), 
         SUBSIDIARY_PRODUCT_VARIANTS(*)
       `,
       )
@@ -153,11 +153,11 @@ const productsSlice = createSlice({
     builder.addCase(getAllProductsByStoreId.fulfilled, (state, action) => {
       const formatedData = action.payload?.map((product: any) => {
         const productTags = product.PRODUCT.PRODUCTS_TAG?.map((tag: any) => tag.TAG) || []; 
-        const productVariants = product.PRODUCT.VARIANTS?.map((variant: any) => variant) || []; 
+        const productVariants = product.PRODUCT.PRODUCT_VARIANTS?.map((variant: any) => variant) || []; 
         return {
           ...product.PRODUCT,
           PRODUCTS_TAG: productTags,
-          VARIANTS: productVariants,
+          PRODUCT_VARIANTS: productVariants,
         };
       });
       state.products = formatedData
