@@ -17,6 +17,7 @@ import { variantsType } from '../../../../../types/products.type'
 import { uploadFile } from '@/libs/supabase/s3'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux/store'
+import { toast } from '@/hooks/useToast'
 
 type ProductsDialogBodyProps = {
   product?: productsType; 
@@ -29,6 +30,8 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
   const { selectedStore } = useSelector((state: RootState) => state.store)
   const { control, handleSubmit, formState: { isValid }, setValue, getValues, watch, reset } = useFormContext<ProductSchemaType>()
   const mainTags = tags.filter((tags:TagsType) => !tags.id_main_tag)
+  const maxCountVariants = 4
+  const variantsCount = watch("VARIANTS")?.length ?? 0
   const childrenTags = tags.filter((tags:TagsType) => tags.id_main_tag)
   const [childrenTagsOptions, setChildrenTagsOptions] = useState<
     Array<{
@@ -93,12 +96,11 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
   }
 
   const onAddVariant = (e: any) => {
-    const maxVariants = 4;
     e.preventDefault();
     
     const variants = watch("VARIANTS") ?? [];
   
-    if (variants.length >= maxVariants) return;
+    if (variants.length >= maxCountVariants) return;
   
     // Agregar una nueva variante
     setValue("VARIANTS", [...variants, {
@@ -120,6 +122,15 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
     e.preventDefault();
     const variants = getValues("VARIANTS") ?? [];
     setValue("VARIANTS", variants.filter((variant: any, index: number) => index !== key));
+  }
+
+  const onDeleteImage = (key: number) => {
+    const imagesFiles = watch("images_files") ?? []; 
+    if (!imagesFiles.length) return
+    setValue(
+      "images_files",
+      imagesFiles.filter((file: File, index: number) => index !== key),
+    );
   }
 
   const onCloseDialog = () => {
@@ -147,7 +158,26 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
 
   const uploadImage = async (e: any) => {
     const file = e.target.files[0];
+    console.log(e.target.files[0])
     const images_files = watch("images_files") ?? [];
+  if(e.target.files[0].type !== "image/jpeg"){
+    toast({
+      variant:"destructive",
+      title: "Error",
+      description: "Los archivos solo pueden ser jpeg",
+      duration: 5000,
+    });
+    return    
+  }
+  if (images_files.some((file: File) => file.name === e.target.files[0].name)) {
+    toast({
+      variant:"destructive", 
+      title: "Error",
+      description: "Ya existe una foto de producto con ese nombre",
+      duration: 5000,
+    });
+    return
+  }
     setValue("images_files", [...images_files, file]);
     console.log(watch("images_files"));
     // if(!selectedStore) return;
@@ -440,15 +470,18 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                   )
                 : null}
             </div>
-            <Button
-              size="sm"
-              className="w-full"
-              onClick={(e) => {
-                onAddVariant(e);
-              }}
-            >
-              Agregar variante
-            </Button>
+            {variantsCount < maxCountVariants ? (
+              <Button
+                size="sm"
+                className="w-full"
+                onClick={(e) => {
+                  onAddVariant(e);
+                }}
+              >
+                Agregar variante
+              </Button>
+            ) : null}
+
             <FormField
               control={control}
               name="images_files"
@@ -463,17 +496,29 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 );
               }}
             />
-            <div className='flex flex-row gap-2 rounded-lg flex-wrap mt-2'>
+            <div className="mt-2 flex flex-row flex-wrap gap-2 rounded-lg">
               {watch("images_files") && watch("images_files")?.length
                 ? watch("images_files")?.map((image: File, index: number) => (
-                    <div key={index} className='relative' >
-                      <div className='absolute -top-2 -right-2  border px-1 bg-white rounded-full opacity-70 hover:opacity-100 cursor-pointer transition-all ease-in-out'>
-                        <Icon remixIconClass='ri-close-circle-fill' color='red' className='hover:text-red-900' />
+                    <div key={index} className="relative">
+                      <div onClick={()=> onDeleteImage(index)} className="absolute -right-2 -top-2 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100">
+                        <Icon
+                          remixIconClass="ri-close-circle-fill"
+                          color="red"
+                          className="hover:text-red-900"
+                        />
                       </div>
-                      <div className='absolute -top-2 right-6  border px-1 bg-white rounded-full opacity-70 hover:opacity-100 cursor-pointer transition-all ease-in-out'>
-                        <Icon remixIconClass='ri-eye-fill' color='blue' className='hover:text-red-900' />
+                      <div className="absolute -top-2 right-6 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100">
+                        <Icon
+                          remixIconClass="ri-eye-fill"
+                          color="blue"
+                          className="hover:text-red-900"
+                        />
                       </div>
-                      <img src={URL.createObjectURL(image)} alt="product image" className='max-w-30 h-20 border rounded-lg shadow-xl' />
+                      <img
+                        src={URL.createObjectURL(image)}
+                        alt="product image"
+                        className="max-w-30 h-20 rounded-lg border shadow-xl"
+                      />
                     </div>
                   ))
                 : null}

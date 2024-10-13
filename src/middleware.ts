@@ -9,7 +9,6 @@ export function middleware(req: NextRequest) {
   const permissions = req.cookies.get('permissions');
 
   if (!UserAuthtoken && pathname.startsWith('/dashboard') && !permissions) {
-    localStorage.clear();
     return NextResponse.redirect(new URL('/auth/register', req.url));
   }
   else if (UserAuthtoken  && pathname.startsWith('/auth') && permissions) {
