@@ -39,11 +39,10 @@ export type productsTagsType = {
 }
 
 export type variantsType = {
-  id?: number;
+  id: number;
   created_at?: string;
   PRODUCT_ID?: number;
   presentation?: string;
-  unid?: string;
 }
 
 export type productsType = {

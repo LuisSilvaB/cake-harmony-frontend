@@ -10,8 +10,8 @@ import Icon from '@/components/ui/icon'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import useToggle from '@/hooks/useToggle.hook'
-import { Check, ChevronsUpDown } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { Car, Check, ChevronsUpDown } from 'lucide-react'
+import React, { useEffect, useRef, useState } from 'react'
 import { FieldErrors, SubmitHandler, useFormContext } from 'react-hook-form'
 import { variantsType } from '../../../../../types/products.type'
 import { uploadFile } from '@/libs/supabase/s3'
@@ -28,11 +28,12 @@ type ProductsDialogBodyProps = {
 const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: ProductsDialogBodyProps) => {
   const toggle = useToggle()
   const { selectedStore } = useSelector((state: RootState) => state.store)
-  const { control, handleSubmit, formState: { isValid }, setValue, getValues, watch, reset } = useFormContext<ProductSchemaType>()
+  const { control, handleSubmit, formState: { isValid, errors }, setValue, getValues, watch, reset } = useFormContext<ProductSchemaType>()
   const mainTags = tags.filter((tags:TagsType) => !tags.id_main_tag)
-  const maxCountVariants = 4
   const variantsCount = watch("VARIANTS")?.length ?? 0
   const childrenTags = tags.filter((tags:TagsType) => tags.id_main_tag)
+  const maxCountVariants = 4
+  const inputUploadImage = useRef<HTMLInputElement>(null)
   const [childrenTagsOptions, setChildrenTagsOptions] = useState<
     Array<{
       value: string;
@@ -108,7 +109,6 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
       created_at: "",
       PRODUCT_ID: 0,
       presentation: "",
-      unid: "",
     }]);
   };
 
@@ -133,11 +133,71 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
     );
   }
 
+  const onAddProductImage = async (e: any) => {
+    try{
+      const file = e.target.files[0];
+      const images_files = watch("images_files") ?? [];
+      if (e.target.files[0] && e.target.files[0].type !== "image/jpeg") {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Los archivos solo pueden ser jpeg",
+          duration: 5000,
+        });
+    }
+    if (images_files.some((file: File) => file.name === e.target.files[0].name)) {
+      toast({
+        variant:"destructive", 
+        title: "Error",
+        description: "Ya existe una foto de producto con ese nombre",
+        duration: 5000,
+      });
+      return
+    }
+      if (!inputUploadImage.current) return;
+      inputUploadImage.current.value = "";
+      setValue("images_files", [...images_files, file]);
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el producto",
+      });
+      return;
+    }
+  }
+
+  const onCreateProduct: SubmitHandler<
+    Omit<ProductSchemaType, "id" >
+  > = async (data) => {
+    console.log(isValid);
+    console.log(data);
+    try {
+      if (!isValid) return;
+      console.log(data);
+
+    } catch (e) {
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el product",
+      });
+      return;
+    }
+  }; 
+
+  const onError = (error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>) => {
+    console.log(error)
+    toast({
+      title: "Vefifique los campos ingresados",
+      description: "Error al registrar",
+      duration: 5000,
+      variant: "destructive"
+    });
+  }
+
   const onCloseDialog = () => {
     reset();
     toggle.onClose();
   }
-  
 
   useEffect(()=> {
     if (!getValues("MAIN_TAG").length) {
@@ -154,59 +214,16 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
         );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[getValues("MAIN_TAG")[0]])
+  },[watch("MAIN_TAG")[0]])
+  // console.log("IMPUTS")
+  // console.log("name",watch("name"))
+  // console.log("image_url",watch("image_url"))
+  // console.log("images_files",watch("images_files"))
+  // console.log("description",watch("description"))
+  // console.log("VARIANTS",watch("VARIANTS"))
+  console.log("MAIN_TAG",watch("MAIN_TAG"))
+  // console.log("TAGS",watch("TAGS"))
 
-  const uploadImage = async (e: any) => {
-    const file = e.target.files[0];
-    console.log(e.target.files[0])
-    const images_files = watch("images_files") ?? [];
-  if(e.target.files[0].type !== "image/jpeg"){
-    toast({
-      variant:"destructive",
-      title: "Error",
-      description: "Los archivos solo pueden ser jpeg",
-      duration: 5000,
-    });
-    return    
-  }
-  if (images_files.some((file: File) => file.name === e.target.files[0].name)) {
-    toast({
-      variant:"destructive", 
-      title: "Error",
-      description: "Ya existe una foto de producto con ese nombre",
-      duration: 5000,
-    });
-    return
-  }
-    setValue("images_files", [...images_files, file]);
-  }
-
-  const onCreateProduct: SubmitHandler<
-    Omit<ProductSchemaType, "id" | "created_at">
-  > = async (data) => {
-    try {
-      if (isValid) {
-        console.log(data);
-      }
-    } catch (e) {
-      toast({
-        title: "Error",
-        description: "No se pudo agregar el product",
-      });
-      return;
-    }
-  }; 
-
-  const onError = (error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>) => {
-    toast({
-      title: "Vefifique los campos ingresados",
-      description: "Error al registrar",
-      duration: 5000,
-      variant: "destructive"
-    });
-  }
-
-  
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onCloseDialog}>
       <TooltipProvider>
@@ -251,20 +268,20 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
       </TooltipProvider>
       <DialogContent
         size="large"
-        className="mt-10 box-border border p-4 top-[45%]"
+        className="top-[45%] mt-10 box-border border p-4"
       >
-          <DialogHeader>
-            <DialogTitle>
-              {product ? "Editar Producto" : "Agregar un Producto"}
-            </DialogTitle>
-            <DialogDescription className="text-sm font-normal">
-              {product
-                ? "Edite los datos correspondientes a tu Producto."
-                : "Registre los datos correspondientes a tu Producto."}
-            </DialogDescription>
-          </DialogHeader>
-        <form className='max-h-[55vh] overflow-y-auto p-2'>
-          <div>
+        <DialogHeader>
+          <DialogTitle>
+            {product ? "Editar Producto" : "Agregar un Producto"}
+          </DialogTitle>
+          <DialogDescription className="text-sm font-normal">
+            {product
+              ? "Edite los datos correspondientes a tu Producto."
+              : "Registre los datos correspondientes a tu Producto."}
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit(onCreateProduct, onError)}>
+          <div className="max-h-[55vh] overflow-y-auto p-2">
             <div className="flex grow flex-row gap-2">
               <FormField
                 control={control}
@@ -459,49 +476,63 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 }}
               />
             </div>
-            <Label>Variantes</Label>
-            <div className="mb-2 mt-2 flex flex-col gap-2">
-              {watch("VARIANTS") && watch("VARIANTS")?.length
-                ? watch("VARIANTS")?.map(
-                    (variant: variantsType, index: number) => (
-                      <div className="flex flex-row gap-2" key={index}>
-                        <Input
-                          key={index}
-                          type="text"
-                          placeholder="Nombre de variable"
-                          className="min-w-56 border"
-                          value={variant.presentation}
-                          onChange={(e) => {
-                            onChangeVariantValue(index, e.target.value);
-                          }}
-                        />
-                        <Button
-                          size="xs"
-                          variant="destructive"
-                          onClick={(e) => onDeleteVariant(e, index)}
-                        >
-                          <Icon
-                            remixIconClass="ri-delete-bin-line"
-                            size="xs"
-                            color="white"
-                          />
-                        </Button>
-                      </div>
-                    ),
-                  )
-                : null}
-            </div>
-            {variantsCount < maxCountVariants ? (
-              <Button
-                size="sm"
-                className="w-full"
-                onClick={(e) => {
-                  onAddVariant(e);
-                }}
-              >
-                Agregar variante
-              </Button>
-            ) : null}
+            <FormField 
+              control={control}
+              name='VARIANTS'
+              render={({field})=>{
+                return (
+                  <FormItem>
+                    <FormLabel>Variantes</FormLabel>
+                    <div className="mb-2 mt-2 flex flex-col gap-2">
+                      {watch("VARIANTS") && watch("VARIANTS")?.length
+                        ? watch("VARIANTS")?.map(
+                            (
+                              variant: Omit<variantsType, "id">,
+                              index: number,
+                            ) => (
+                              <div className="flex flex-row gap-2" key={index}>
+                                <Input
+                                  key={index}
+                                  type="text"
+                                  placeholder="Nombre de variable"
+                                  className="min-w-56 border"
+                                  value={variant.presentation}
+                                  onChange={(e) => {
+                                    onChangeVariantValue(index, e.target.value);
+                                  }}
+                                />
+                                <Button
+                                  size="xs"
+                                  variant="destructive"
+                                  onClick={(e) => onDeleteVariant(e, index)}
+                                >
+                                  <Icon
+                                    remixIconClass="ri-delete-bin-line"
+                                    size="xs"
+                                    color="white"
+                                  />
+                                </Button>
+                              </div>
+                            ),
+                          )
+                        : null}
+                    </div>
+                    {variantsCount < maxCountVariants ? (
+                      <Button
+                        size="sm"
+                        className="w-full"
+                        onClick={(e) => {
+                          onAddVariant(e);
+                        }}
+                      >
+                        Agregar variante
+                      </Button>
+                    ) : null}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
 
             <FormField
               control={control}
@@ -511,8 +542,9 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                   <FormItem>
                     <FormLabel>Imagenes</FormLabel>
                     <FormControl>
-                      <Input type="file" onChange={uploadImage} />
+                      <Input ref={inputUploadImage} type="file" onChange={onAddProductImage} />
                     </FormControl>
+                    <FormMessage />
                   </FormItem>
                 );
               }}
@@ -548,10 +580,10 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 : null}
             </div>
           </div>
+          <DialogFooter>
+            <Button type='submit'>Crear producto</Button>
+          </DialogFooter>
         </form>
-        <DialogFooter className="w-full bg-white">
-          <Button>Crear producto</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
