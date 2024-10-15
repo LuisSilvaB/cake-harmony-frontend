@@ -51,8 +51,9 @@ const StoreSubsidiaryDialog = () => {
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={toggle.onToggle}>
-      <DialogTrigger className="relative">
+      <DialogTrigger className="relative h-8 w-8 rounded-full transition-all hover:border">
         <Button
+          asChild
           className="h-8 w-8 rounded-full transition-all hover:border"
           variant="ghost"
           size="xs"

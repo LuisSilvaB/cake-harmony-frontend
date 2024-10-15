@@ -13,10 +13,12 @@ interface ProductDialogProps {
 }
 
 const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialogProps) => {
+  
   const defaultValues: ProductSchemaType = {
     id: 0,
     name: "",
     description: "",
+    brand:"", 
     image_url: [],
     images_files: [],
     MAIN_TAG: [], 
@@ -27,8 +29,7 @@ const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialo
   const formMethods = useForm<ProductSchemaType>({
     defaultValues,
     resolver: zodResolver(ProductSchema),
-    mode: "all",
-    reValidateMode: "onSubmit", 
+    mode: "onChange",
   });
   return (
     <FormProvider {...formMethods}>

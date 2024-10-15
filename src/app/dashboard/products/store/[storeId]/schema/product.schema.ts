@@ -10,17 +10,18 @@ const productSchema = z.object({
   description: z.string().min(3, {
     message: "El nombre debe tener al menos 3 caracteres",
   }),
+  brand:z.string().min(3, {
+    message:"La marca debe tener al menos 3 caracteres"
+  }),
   image_url: z.array(z.string()).optional(),
-  images_files: z.array(z.object(
-    {
-      
-    }
-  )).optional(),
-    // .refine((file) => file?.size <= MAX_FILE_SIZE, `Max image size is 5MB.`)
-    // .refine(
-    //   (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-    //   "Only .jpg, .jpeg, .png and .webp formats are supported.",
-    // )
+  Product_files: z.array(z.object({
+    id: z.number(), 
+    PRODUCT_ID: z.number(),
+    created_at:z.number(), 
+    path:z.string(), 
+    file_name:z.string(), 
+  })).optional(),
+  images_files: z.array(z.any()).optional(),
   MAIN_TAG: z
     .array(
       z.object({

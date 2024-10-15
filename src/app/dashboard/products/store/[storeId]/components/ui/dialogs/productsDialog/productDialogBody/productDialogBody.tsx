@@ -1,140 +1,194 @@
-import { productsType } from '@/app/dashboard/globalProducts/types/globalProducts.type'
-import { ProductSchemaType } from '@/app/dashboard/products/store/[storeId]/schema/product.schema'
-import { TagsType } from '@/app/dashboard/tags/types/tags.type'
-import { Button, Input, Label } from '@/components/ui'
-import { Badge } from '@/components/ui/badge'
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
-import { DialogContent, Dialog, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import Icon from '@/components/ui/icon'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import useToggle from '@/hooks/useToggle.hook'
-import { Car, Check, ChevronsUpDown } from 'lucide-react'
-import React, { useEffect, useRef, useState } from 'react'
-import { FieldErrors, SubmitHandler, useFormContext } from 'react-hook-form'
-import { variantsType } from '../../../../../types/products.type'
-import { uploadFile } from '@/libs/supabase/s3'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/redux/store'
-import { toast } from '@/hooks/useToast'
+import { productsType } from "@/app/dashboard/globalProducts/types/globalProducts.type";
+import { ProductSchemaType } from "@/app/dashboard/products/store/[storeId]/schema/product.schema";
+import { TagsType } from "@/app/dashboard/tags/types/tags.type";
+import { Button, Input, Label } from "@/components/ui";
+import { Badge } from "@/components/ui/badge";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  DialogContent,
+  Dialog,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import Icon from "@/components/ui/icon";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import useToggle from "@/hooks/useToggle.hook";
+import { Car, Check, ChevronsUpDown } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
+import { FieldErrors, SubmitHandler, useFormContext } from "react-hook-form";
+import { variantsType } from "../../../../../types/products.type";
+import { uploadFile } from "@/libs/supabase/s3";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
+import { toast } from "@/hooks/useToast";
+import { createProduct } from "../../../../../feature/products.feature";
 
 type ProductsDialogBodyProps = {
-  product?: productsType; 
-  tags:TagsType[]; 
-  loadingTags:boolean;
-}
+  product?: productsType;
+  tags: TagsType[];
+  loadingTags: boolean;
+};
 
-const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: ProductsDialogBodyProps) => {
-  const toggle = useToggle()
-  const { selectedStore } = useSelector((state: RootState) => state.store)
-  const { control, handleSubmit, formState: { isValid, errors }, setValue, getValues, watch, reset } = useFormContext<ProductSchemaType>()
-  const mainTags = tags.filter((tags:TagsType) => !tags.id_main_tag)
-  const variantsCount = watch("VARIANTS")?.length ?? 0
-  const childrenTags = tags.filter((tags:TagsType) => tags.id_main_tag)
-  const maxCountVariants = 4
-  const inputUploadImage = useRef<HTMLInputElement>(null)
+const ProductsDialogBody = ({
+  product,
+  tags = [],
+  loadingTags = false,
+}: ProductsDialogBodyProps) => {
   const [childrenTagsOptions, setChildrenTagsOptions] = useState<
     Array<{
       value: string;
       label: string;
     }>
   >([]);
-  let mainTagsOptions = []
-  
-  mainTagsOptions = mainTags.map(
-    (tag: TagsType) => ({
-      value: tag.name.toLowerCase(),
-      label: tag.name,
-    }),
-  );
+  const toggle = useToggle();
 
-  const toggleComboboxCategory = useToggle()
-  const toggleComboboxCategoryChildren = useToggle()
-  
+  const { selectedStore } = useSelector((state: RootState) => state.store);
+  const {
+    control,
+    handleSubmit,
+    formState: { isValid },
+    setValue,
+    getValues,
+    watch,
+    reset,
+    trigger
+  } = useFormContext<ProductSchemaType>();
+  const mainTags = tags.filter((tags: TagsType) => !tags.id_main_tag);
+  const childrenTags = tags.filter((tags: TagsType) => tags.id_main_tag);
+  const variantsCount = watch("VARIANTS")?.length ?? 0;
+  const inputUploadImage = useRef<HTMLInputElement>(null);
+  const maxCountVariants = 4;
+  let mainTagsOptions = [];
+
+  mainTagsOptions = mainTags.map((tag: TagsType) => ({
+    value: tag.name.toLowerCase(),
+    label: tag.name,
+  }));
+
+  const toggleComboboxCategory = useToggle();
+  const toggleComboboxCategoryChildren = useToggle();
+
   const onChangeMainTag = (value: string) => {
-    const selectedMainTag = mainTags.find((tag:TagsType)=> tag.name.toLowerCase() === value)
-    if(!selectedMainTag) return 
-      setValue("MAIN_TAG", [{
+    const selectedMainTag = mainTags.find(
+      (tag: TagsType) => tag.name.toLowerCase() === value,
+    );
+    if (!selectedMainTag) return;
+    setValue("MAIN_TAG", [
+      {
         id: selectedMainTag.id,
         name: selectedMainTag.name,
         color: selectedMainTag.color ?? "",
         created_at: selectedMainTag.created_at,
         id_main_tag: selectedMainTag.id_main_tag,
-      }]);
-      setValue("TAGS", []);
-  }
+      },
+    ]);
+    setValue("TAGS", []);
+  };
 
   const onDeleteMainTag = () => {
-    setValue("MAIN_TAG",[]); 
-    setValue("TAGS",[])
-    setChildrenTagsOptions([])
-  }
+    setValue("MAIN_TAG", []);
+    setValue("TAGS", []);
+    setChildrenTagsOptions([]);
+  };
 
   const onChangeTag = (value: string) => {
-    const selectedTag = childrenTags.find((tag: TagsType) => tag.name.toLowerCase() === value);
+    const selectedTag = childrenTags.find(
+      (tag: TagsType) => tag.name.toLowerCase() === value,
+    );
     const tags = getValues("TAGS");
 
     if (!selectedTag) return;
     const tagExists = tags.some((tag: any) => tag.id === selectedTag.id);
-    
+
     if (!tagExists) {
-      const updatedTags = [...tags, {
-        id: selectedTag.id,
-        name: selectedTag.name,
-        color: selectedTag.color ?? "",
-        created_at: selectedTag.created_at,   
-        id_main_tag: selectedTag.id_main_tag,
-      }];
-      
+      const updatedTags = [
+        ...tags,
+        {
+          id: selectedTag.id,
+          name: selectedTag.name,
+          color: selectedTag.color ?? "",
+          created_at: selectedTag.created_at,
+          id_main_tag: selectedTag.id_main_tag,
+        },
+      ];
+
       setValue("TAGS", updatedTags);
     }
-  }
-  
-  const onDeleteTag = ( idTag: number) => {
+  };
+
+  const onDeleteTag = (idTag: number) => {
     const tags = getValues("TAGS");
-    setValue("TAGS", tags.filter((tag: any) => tag.id !== idTag));
-  }
+    setValue(
+      "TAGS",
+      tags.filter((tag: any) => tag.id !== idTag),
+    );
+  };
 
   const onAddVariant = (e: any) => {
     e.preventDefault();
-    
+
     const variants = watch("VARIANTS") ?? [];
-  
+
     if (variants.length >= maxCountVariants) return;
-  
+
     // Agregar una nueva variante
-    setValue("VARIANTS", [...variants, {
-      id: 0, 
-      created_at: "",
-      PRODUCT_ID: 0,
-      presentation: "",
-    }]);
+    setValue("VARIANTS", [
+      ...variants,
+      {
+        id: 0,
+        created_at: "",
+        PRODUCT_ID: 0,
+        presentation: "",
+      },
+    ]);
   };
 
-  const onChangeVariantValue = (key: number, value: string) =>{
+  const onChangeVariantValue = (key: number, value: string) => {
     const variants = getValues("VARIANTS") ?? [];
     variants[key].presentation = value;
-    setValue("VARIANTS", variants);   
-  }
+    setValue("VARIANTS", variants);
+  };
 
-  const onDeleteVariant = (e: any, key: number) =>{
+  const onDeleteVariant = (e: any, key: number) => {
     e.preventDefault();
     const variants = getValues("VARIANTS") ?? [];
-    setValue("VARIANTS", variants.filter((variant: any, index: number) => index !== key));
-  }
+    setValue(
+      "VARIANTS",
+      variants.filter((variant: any, index: number) => index !== key),
+    );
+  };
 
   const onDeleteImage = (key: number) => {
-    const imagesFiles = watch("images_files") ?? []; 
-    if (!imagesFiles.length) return
+    const imagesFiles = watch("images_files") ?? [];
+    if (!imagesFiles.length) return;
     setValue(
       "images_files",
       imagesFiles.filter((file: File, index: number) => index !== key),
     );
-  }
+  };
 
   const onAddProductImage = async (e: any) => {
-    try{
+    try {
       const file = e.target.files[0];
       const images_files = watch("images_files") ?? [];
       if (e.target.files[0] && e.target.files[0].type !== "image/jpeg") {
@@ -144,16 +198,18 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
           description: "Los archivos solo pueden ser jpeg",
           duration: 5000,
         });
-    }
-    if (images_files.some((file: File) => file.name === e.target.files[0].name)) {
-      toast({
-        variant:"destructive", 
-        title: "Error",
-        description: "Ya existe una foto de producto con ese nombre",
-        duration: 5000,
-      });
-      return
-    }
+      }
+      if (
+        images_files.some((file: File) => file.name === e.target.files[0].name)
+      ) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Ya existe una foto de producto con ese nombre",
+          duration: 5000,
+        });
+        return;
+      }
       if (!inputUploadImage.current) return;
       inputUploadImage.current.value = "";
       setValue("images_files", [...images_files, file]);
@@ -164,17 +220,19 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
       });
       return;
     }
-  }
+  };
 
-  const onCreateProduct: SubmitHandler<
-    Omit<ProductSchemaType, "id" >
-  > = async (data) => {
-    console.log(isValid);
-    console.log(data);
+  const onSubmitCreateProduct: SubmitHandler<Omit<ProductSchemaType, "id">> = async (
+    data
+  ) => {
+    await trigger(); 
     try {
       if (!isValid) return;
-      console.log(data);
-
+      if(!selectedStore) return; 
+      const product = createProduct({
+        data: data, 
+        stroeId: selectedStore.id ?? 0
+      }); 
     } catch (e) {
       toast({
         title: "Error",
@@ -182,90 +240,62 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
       });
       return;
     }
-  }; 
-
-  const onError = (error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>) => {
-    console.log(error)
+  };
+  const onError = (
+    error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>,
+  ) => {
+    console.log(error);
     toast({
       title: "Vefifique los campos ingresados",
       description: "Error al registrar",
       duration: 5000,
-      variant: "destructive"
+      variant: "destructive",
     });
-  }
+  };
 
   const onCloseDialog = () => {
     reset();
     toggle.onClose();
-  }
+  };
 
-  useEffect(()=> {
+  useEffect(() => {
     if (!getValues("MAIN_TAG").length) {
       setValue("TAGS", []);
-    }else {
-        const childrenTagsByMainTag = childrenTags.filter(
-          (tag: TagsType) => tag.id_main_tag === getValues("MAIN_TAG")[0]?.id,
-        );
-        setChildrenTagsOptions(
-          childrenTagsByMainTag.map((tag: any) => ({
-            value: tag.name.toLowerCase(),
-            label: tag.name,
-          })),
-        );
+    } else {
+      const childrenTagsByMainTag = childrenTags.filter(
+        (tag: TagsType) => tag.id_main_tag === getValues("MAIN_TAG")[0]?.id,
+      );
+      setChildrenTagsOptions(
+        childrenTagsByMainTag.map((tag: any) => ({
+          value: tag.name.toLowerCase(),
+          label: tag.name,
+        })),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[watch("MAIN_TAG")[0]])
-  // console.log("IMPUTS")
-  // console.log("name",watch("name"))
-  // console.log("image_url",watch("image_url"))
-  // console.log("images_files",watch("images_files"))
-  // console.log("description",watch("description"))
-  // console.log("VARIANTS",watch("VARIANTS"))
-  console.log("MAIN_TAG",watch("MAIN_TAG"))
-  // console.log("TAGS",watch("TAGS"))
+  }, [watch("MAIN_TAG")[0]]);
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onCloseDialog}>
-      <TooltipProvider>
-        {product ? (
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                onClick={toggle.onOpen}
-                size={"xs"}
-                variant="secondary"
-                className="items-center justify-center rounded-lg"
-              >
-                <Icon remixIconClass="ri-pencil-line" size="md" color="gray" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              sideOffset={5}
-              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
-            >
-              <p className="text-sm">Editar Producto</p>
-            </TooltipContent>
-          </Tooltip>
-        ) : (
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                onClick={toggle.onOpen}
-                size={"sm"}
-                className="items-center justify-center rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
-              >
-                <Icon remixIconClass="ri-add-line" size="md" color="white" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent
-              sideOffset={5}
-              className="border bg-white text-xs font-normal text-gray-500 shadow-xl"
-            >
-              <p className="text-sm">Agregar nueva Producto</p>
-            </TooltipContent>
-          </Tooltip>
-        )}
-      </TooltipProvider>
+      {product ? (
+        <Button
+          asChild
+          onClick={toggle.onOpen}
+          size={"xs"}
+          variant="secondary"
+          className="items-center justify-center rounded-lg"
+        >
+          <Icon remixIconClass="ri-pencil-line" size="md" color="gray" />
+        </Button>
+      ) : (
+        <Button
+          onClick={toggle.onOpen}
+          size={"sm"}
+          className="items-center justify-center rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
+        >
+          <Icon remixIconClass="ri-add-line" size="md" color="white" />
+        </Button>
+      )}
       <DialogContent
         size="large"
         className="top-[45%] mt-10 box-border border p-4"
@@ -280,7 +310,7 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
               : "Registre los datos correspondientes a tu Producto."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onCreateProduct, onError)}>
+        <form onSubmit={handleSubmit(onSubmitCreateProduct, onError)}>
           <div className="max-h-[55vh] overflow-y-auto p-2">
             <div className="flex grow flex-row gap-2">
               <FormField
@@ -322,6 +352,25 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 )}
               />
             </div>
+            <FormField
+                control={control}
+                name="brand"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Marca</FormLabel>
+                    <FormControl>
+                      <Input
+                        value={field.value}
+                        onChange={field.onChange}
+                        type="text"
+                        placeholder="Marca del producto"
+                        className="min-w-56 border"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             <div className="flex grow flex-row gap-2">
               <FormField
                 control={control}
@@ -476,10 +525,10 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                 }}
               />
             </div>
-            <FormField 
+            <FormField
               control={control}
-              name='VARIANTS'
-              render={({field})=>{
+              name="VARIANTS"
+              render={({ field }) => {
                 return (
                   <FormItem>
                     <FormLabel>Variantes</FormLabel>
@@ -542,7 +591,11 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
                   <FormItem>
                     <FormLabel>Imagenes</FormLabel>
                     <FormControl>
-                      <Input ref={inputUploadImage} type="file" onChange={onAddProductImage} />
+                      <Input
+                        ref={inputUploadImage}
+                        type="file"
+                        onChange={onAddProductImage}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -581,12 +634,12 @@ const ProductsDialogBody = ( { product, tags = [], loadingTags = false }: Produc
             </div>
           </div>
           <DialogFooter>
-            <Button type='submit'>Crear producto</Button>
+            <Button type="submit">Crear producto</Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
   );
-}
+};
 
-export default ProductsDialogBody
+export default ProductsDialogBody;

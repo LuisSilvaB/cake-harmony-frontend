@@ -48,7 +48,7 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
     //   header: "Marca",
     //   cell: (info) => info.getValue(),
     // }),
-    columnHelper.accessor("PRODUCTS_TAG", {
+    columnHelper.accessor("PRODUCTS_TAGS", {
       header: "CATEGORÍA",
       cell: (info) => (
         <div>
@@ -70,7 +70,7 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
         </div>
       ),
     }),
-    columnHelper.accessor("PRODUCTS_TAG", {
+    columnHelper.accessor("PRODUCTS_TAGS", {
       header: "SUB CATEGORÍAS",
       cell: (info) => (
         <div>

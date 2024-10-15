@@ -12,7 +12,7 @@ export const getAllProducts = createAsyncThunk(
     const { data, error } = await supabase.from("PRODUCT").select(
       `
         *,
-        PRODUCTS_TAG(*, TAG(*)),
+        PRODUCTS_TAGS(*, TAG(*)),
         VARIANTS(*)
       `,
       //PRODUCT STORE -> LA RALACION CON PRODUCT STORE
@@ -42,7 +42,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
     const { data: ProductsData, error: ProductError } = await supabase.from("PRODUCT").select(
       `
         *,
-        PRODUCTS_TAG(*, TAG(*)),
+        PRODUCTS_TAGS(*, TAG(*)),
         VARIANTS(*)
       `,
     );
@@ -51,7 +51,7 @@ export const getProductBySubsidiaryId = createAsyncThunk(
       .select(
         `
         *,
-        PRODUCTS_TAG(*, TAG(*)),
+        PRODUCTS_TAGS(*, TAG(*)),
         VARIANTS(*), 
         SUBSIDIARY_VARIANTS(*)
       `,
@@ -85,7 +85,7 @@ export const onSearchProducts = createAsyncThunk<productsType[], { query: string
     if (trimmedQuery !== "") {
       const response = await supabase
         .from("PRODUCT")
-        .select("*,PRODUCTS_TAG(*, TAG(*))")
+        .select("*,PRODUCTS_TAGS(*, TAG(*))")
         .ilike("name", `%${trimmedQuery}%`);
 
       data = response.data;

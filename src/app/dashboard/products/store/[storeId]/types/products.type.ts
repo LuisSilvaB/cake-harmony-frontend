@@ -51,7 +51,7 @@ export type productsType = {
   description: string;
   brand: string;
   image_url: Array<string>;
-  PRODUCTS_TAG: Array<TagsType>;  
+  PRODUCTS_TAGS: Array<TagsType>;  
   VARIANTS: Array<variantsType>;
 }
 

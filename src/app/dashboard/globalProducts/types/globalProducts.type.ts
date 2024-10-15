@@ -7,7 +7,7 @@ export type productsType = {
   description: string;
   image_url: Array<string>;
   brand: string;
-  PRODUCTS_TAG: Array<{
+  PRODUCTS_TAGS: Array<{
     id: number;
     TAG: {
       id: number;
