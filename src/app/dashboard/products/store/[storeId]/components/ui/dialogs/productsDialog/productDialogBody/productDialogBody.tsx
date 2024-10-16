@@ -38,8 +38,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { FieldErrors, SubmitHandler, useFormContext } from "react-hook-form";
 import { variantsType } from "../../../../../types/products.type";
 import { uploadFile } from "@/libs/supabase/s3";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "@/hooks/useToast";
 import { createProduct } from "../../../../../feature/products.feature";
 
@@ -61,12 +61,12 @@ const ProductsDialogBody = ({
     }>
   >([]);
   const toggle = useToggle();
-
+  const dispatch = useDispatch<AppDispatch>();
   const { selectedStore } = useSelector((state: RootState) => state.store);
+  const { loadingCreateProduct } = useSelector((state: RootState) => state.products);
   const {
     control,
     handleSubmit,
-    formState: { isValid },
     setValue,
     getValues,
     watch,
@@ -225,14 +225,16 @@ const ProductsDialogBody = ({
   const onSubmitCreateProduct: SubmitHandler<Omit<ProductSchemaType, "id">> = async (
     data
   ) => {
-    await trigger(); 
     try {
+      const isValid = await trigger();
       if (!isValid) return;
-      if(!selectedStore) return; 
-      const product = createProduct({
-        data: data, 
-        stroeId: selectedStore.id ?? 0
-      }); 
+      if(!selectedStore) return;
+      const product = dispatch(
+        createProduct({
+          data: data,
+          stroeId: selectedStore.id ?? 0,
+        }),
+      );
     } catch (e) {
       toast({
         title: "Error",

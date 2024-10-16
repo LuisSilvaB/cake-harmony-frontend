@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { gabarito } from '@/fonts';
+import { cookie, gabarito } from '@/fonts';
 import { SymbolIcon } from '@radix-ui/react-icons';
 import { cx } from 'class-variance-authority';
 import { AppDispatch } from '@/redux/store';
@@ -23,7 +23,10 @@ const PermissionsLoader = () => {
   const clearStorageAndRedirect = () => {
     setLoader(null);
     localStorage.clear();
-    Cookies.remove('user-auth-access-token');
+    Cookies.remove('access_token');
+    Cookies.remove('user_session');
+    Cookies.remove('sb-jmvxuavxrxfaxtdkmibn-auth-token.0');
+    Cookies.remove('sb-jmvxuavxrxfaxtdkmibn-auth-token.1');
     router.push('/auth/login');
   };
 

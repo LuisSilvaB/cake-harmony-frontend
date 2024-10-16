@@ -5,6 +5,7 @@ import { toast } from "@/hooks/useToast";
 import { debounce } from "lodash";
 import { productsType } from "../types/products.type";
 import { ProductSchemaType } from "../schema/product.schema";
+import { uploadFile } from "@/libs/supabase/s3";
 
 const supabase = createSupabaseBrowserClient();
 
@@ -13,7 +14,7 @@ export const getAllProductsByStoreId = createAsyncThunk(
   async ({ storeId }: { storeId: number }) => {
     const { data, error } = await supabase
       .from("PRODUCTS_STORE")
-      .select("PRODUCT(*, PRODUCTS_TAGS(TAG(*)),VARIANTS(*))")
+      .select("PRODUCT(*, PRODUCTS_TAGS(TAG(*)),PRODUCT_VARIANTS(*))")
       .eq("STORE_ID", storeId);
 
     if (error && !data) {
@@ -73,14 +74,48 @@ export const createProduct = createAsyncThunk(
       return rejectWithValue(null)
     }
 
+    // ? Register products_store
+
+    const { data:StoreProductData, error:StoreProductError } = await supabase.from("PRODUCTS_STORE").insert({
+      PRODUCT_ID: ProductData[0].id,
+      STORE_ID: stroeId
+    }).select()
+
+    if(StoreProductError || !StoreProductData) {
+      toast({title:"Error al crear productos", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+      return rejectWithValue(null)
+    }
+
+
     // ? Register products tags 
     await Promise.all(data.MAIN_TAG.map( async (tag: any)=>{
-      const { data: ProductTagsData, error: ProductTagsError } = await supabase.from("PRODUCT_TAGS").insert({
+      const { data: ProductTagsData, error: ProductTagsError } = await supabase.from("PRODUCTS_TAGS").insert({
         PRODUCT_ID: ProductData[0].id,
         TAG_ID: tag.id,
         type: "CATEGORY"
       })  
     }))
+
+    // ? Register products variants
+    await Promise.all(data.VARIANTS.map( async (variant: any)=>{
+      const { data: ProductVariantsData, error: ProductVariantsError } = await supabase.from("PRODUCT_VARIANTS").insert({
+        PRODUCT_ID: ProductData[0].id,
+        presentation: variant.presentation,
+      })  
+    }))
+
+    // ? Register products files
+    await Promise.all(data.images_files.map( async (file: any)=>{
+      const { data: ProductFilesData, error: ProductFilesError } = await supabase.from("PRODUCT_FILES").insert({
+        PRODUCT_ID: ProductData[0].id,
+        path: file.path,
+        file_name: file.name,
+      })  
+
+      uploadFile(file, `/stores/${stroeId}/products` )
+
+    }))
+
   }
 );
 
@@ -172,6 +207,7 @@ const productsSlice = createSlice({
     loadingSearchProducts: false as boolean,
     loadingProduct: false as boolean,
     selectedProduct: null as productsType | null,
+    loadingCreateProduct: false as boolean,
   },
   reducers: {
     setProductsProducts: (state, action) => {
@@ -224,6 +260,15 @@ const productsSlice = createSlice({
     });
     builder.addCase(getProductBySubsidiaryId.rejected, (state, action) => {
       state.loadingProduct = false;
+    });
+    builder.addCase(createProduct.pending, (state, action) => {
+      state.loadingCreateProduct = true;
+    });
+    builder.addCase(createProduct.fulfilled, (state, action) => {
+      state.loadingCreateProduct = false;
+    });
+    builder.addCase(createProduct.rejected, (state, action) => {
+      state.loadingCreateProduct = false;
     });
   },
 });

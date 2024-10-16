@@ -29,7 +29,7 @@ const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialo
   const formMethods = useForm<ProductSchemaType>({
     defaultValues,
     resolver: zodResolver(ProductSchema),
-    mode: "onChange",
+    mode: "all",
   });
   return (
     <FormProvider {...formMethods}>

@@ -8,20 +8,20 @@ const productSchema = z.object({
     message: "El nombre debe tener al menos 3 caracteres",
   }),
   description: z.string().min(3, {
-    message: "El nombre debe tener al menos 3 caracteres",
+    message: "La descripción debe tener al menos 3 caracteres",
   }),
-  brand:z.string().min(3, {
-    message:"La marca debe tener al menos 3 caracteres"
+  brand: z.string().min(3, {
+    message: "La marca debe tener al menos 3 caracteres",
   }),
   image_url: z.array(z.string()).optional(),
   Product_files: z.array(z.object({
-    id: z.number(), 
+    id: z.number(),
     PRODUCT_ID: z.number(),
-    created_at:z.number(), 
-    path:z.string(), 
-    file_name:z.string(), 
+    created_at: z.string(), 
+    path: z.string(),
+    file_name: z.string(),
   })).optional(),
-  images_files: z.array(z.any()).optional(),
+  images_files: z.array(z.instanceof(File)).optional(), 
   MAIN_TAG: z
     .array(
       z.object({
@@ -62,8 +62,7 @@ const productSchema = z.object({
         unid: z.number().optional(),
       }),
     )
-    .min(1, { message: "Debe agregar al menos una variante" })
+    .min(1, { message: "Debe agregar al menos una variante" }),
 });
-
 export const ProductSchema = productSchema
 export type ProductSchemaType = z.infer<typeof productSchema>
