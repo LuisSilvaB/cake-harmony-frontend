@@ -7,6 +7,7 @@ import { FaSpinner } from 'react-icons/fa'
 
 const ProductsBody = () => {
   const { products, loadingProducts } = useSelector((state: RootState) => state.products)
+  const { selectedStore } = useSelector((state: RootState) => state.store)
   if (loadingProducts)
     return (
       <div className="flex h-full w-full items-center justify-center">
@@ -16,7 +17,7 @@ const ProductsBody = () => {
 
   return (
     <div className="flex w-full flex-col overflow-auto">
-      <ProductTable globalProducts={products} />
+      <ProductTable products={products} selectedStore={selectedStore} />
     </div>
   );
 }

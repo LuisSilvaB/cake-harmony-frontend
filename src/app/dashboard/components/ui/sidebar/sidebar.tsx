@@ -1,4 +1,5 @@
 'use client'
+
 import React from 'react'
 import cx from '@/utils/cx';
 import { gabarito } from '@/fonts';
@@ -23,10 +24,7 @@ const Sidebar = () => {
     <div className="flex h-full max-w-10 flex-col items-center justify-start gap-2 border bg-white px-4 lg:max-w-56">
       <section className="flex h-full max-h-14 w-full items-center justify-start">
         <p
-          className={cx(
-            "text-2xl font-semibold text-atomic-tangerine-300",
-            gabarito.className,
-          )}
+          className={`text-2xl font-semibold text-atomic-tangerine-300 ${gabarito.style}`}
         >
           Cake
           <span className="pl-1 text-amber-900">Harmony</span>
@@ -42,11 +40,13 @@ const Sidebar = () => {
               size="xs"
               variant={"ghost"}
             >
-              <Icon remixIconClass={item?.icon ?? ""} size="xl" color="atomic-400" />
+              <Icon
+                remixIconClass={item?.icon ?? ""}
+                size="xl"
+                color="atomic-400"
+              />
               <span className="text-xs">
-                {
-                  upperLowerCase(item.description)
-                }
+                {upperLowerCase(item.description)}
               </span>
             </Button>
           </Link>

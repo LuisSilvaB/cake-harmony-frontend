@@ -33,7 +33,7 @@ import { TagsType } from "@/app/dashboard/tags/types/tags.type";
 export type productsTagsType = {
   id: number;
   type: string;
-  created_at: string;
+  created_at?: string;
   TAG_ID: number;
   PRODUCT_ID: string;
 }
@@ -45,14 +45,24 @@ export type variantsType = {
   presentation?: string;
 }
 
+export type ProductFilesType = { 
+  id:number; 
+  PRODUCT_ID: number;
+  path: string;
+  file_name: string;
+  created_at?: string;
+}
+
+
 export type productsType = {
   id: number;
   name: string;
   description: string;
   brand: string;
   image_url: Array<string>;
-  PRODUCTS_TAGS: Array<TagsType>;  
-  VARIANTS: Array<variantsType>;
+  PRODUCTS_TAGS: Array<TagsType>; 
+  PRODUCT_VARIANTS: Array<variantsType>;
+  PRODUCT_FILES: Array<ProductFilesType>;
 }
 
 

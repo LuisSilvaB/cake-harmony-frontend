@@ -27,6 +27,8 @@ const PermissionsLoader = () => {
     Cookies.remove('user_session');
     Cookies.remove('sb-jmvxuavxrxfaxtdkmibn-auth-token.0');
     Cookies.remove('sb-jmvxuavxrxfaxtdkmibn-auth-token.1');
+    Cookies.remove('user-auth-access-token');
+    Cookies.remove('permissions');
     router.push('/auth/login');
   };
 

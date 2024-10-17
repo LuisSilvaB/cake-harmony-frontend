@@ -5,7 +5,7 @@ import cx from '@/utils/cx'
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getTags } from '../../../../../../tags/feature/tags.feature'
-import { getAllProductsByStoreId } from '../../../feature/products.feature'
+import { getAllProductsByStoreIdFeature } from '../../../feature/products.feature'
 
 const ProductsHeader = () => {
   const dispatch = useDispatch<AppDispatch>() 
@@ -14,7 +14,7 @@ const ProductsHeader = () => {
   
   useEffect(()=>{
     const fetchData = async () => {
-      await dispatch(getAllProductsByStoreId({ storeId: selectedStore?.id ?? 0 }))
+      await dispatch(getAllProductsByStoreIdFeature({ storeId: selectedStore?.id ?? 0 }))
       await dispatch(getTags())
     }
 

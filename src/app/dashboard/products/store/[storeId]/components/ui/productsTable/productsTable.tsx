@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { productsTagsType, productsType } from '../../../types/products.type'
+import { ProductFilesType, productsTagsType, productsType } from '../../../types/products.type'
 import { upperLowerCase } from '@/utils/upperLowerCase.util';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,12 +9,14 @@ import useToggle from '@/hooks/useToggle.hook';
 import { Dialog, DialogTrigger, DialogContent } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
 import { TagsType } from '@/app/dashboard/tags/types/tags.type';
+import { StoreType } from '@/app/dashboard/store/types/store.type';
 
 type productsTableProps = {
-  globalProducts: productsType[]
+  products: productsType[]
+  selectedStore: StoreType | null
 }
 
-const ProductsTable = ({ globalProducts }: productsTableProps) => {
+const ProductsTable = ({ products, selectedStore }: productsTableProps) => {
   const [ selecteProductId, setSelectProductId ] = useState<string>("");
   const toggle = useToggle()
   const onSelectProduct = (productId: string) => {
@@ -94,27 +96,42 @@ const ProductsTable = ({ globalProducts }: productsTableProps) => {
         </div>
       ),
     }),
-    columnHelper.accessor("image_url", {
+    columnHelper.accessor("PRODUCT_FILES", {
       header: "Imágenes",
-      cell: (info) => (
-        <div className="flex w-full flex-row items-center justify-center gap-4">
-          {info.getValue().map((url: string, index: number) => (
-            <Avatar key={index}>
-              <AvatarImage src={url} alt="product img" />
-              <AvatarFallback>PI</AvatarFallback>
-            </Avatar>
-          ))}
-        </div>
-      ),
+      cell: (info) => {
+        if(!info.getValue().length) return null
+        return (
+          <div className="flex w-full flex-row items-center justify-center gap-4">
+            {info
+              .getValue()
+              .map((productFile: ProductFilesType, index: number) => (
+                <Avatar key={index}>
+                  <AvatarImage
+                    src={
+                      process.env.NEXT_PUBLIC_SUPABASE_URL! +
+                      process.env.NEXT_PUBLIC_SUPABASE_BUCKET_ROUTE! +
+                      "/stores/" +
+                      selectedStore?.id +
+                      "/products/" +
+                      productFile.file_name
+                    }
+                    alt="product img"
+                  />
+                  <AvatarFallback>PI</AvatarFallback>
+                </Avatar>
+              ))}
+          </div>
+        );
+      },
     }),
-    columnHelper.accessor("id", {
-      header: "Acciones",
-      // cell: (info) => <ProductDialog product={info.row.original} />,
-    }),
+    // columnHelper.accessor("id", {
+    //   header: "Acciones",
+    //   // cell: (info) => <ProductDialog product={info.row.original} />,
+    // }),
   ];
 
   const table = useReactTable({
-    data: globalProducts as productsType[],
+    data: products as productsType[],
     columns,
     getPaginationRowModel: getPaginationRowModel(),
     getCoreRowModel: getCoreRowModel(), 

@@ -41,7 +41,7 @@ import { uploadFile } from "@/libs/supabase/s3";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "@/hooks/useToast";
-import { createProduct } from "../../../../../feature/products.feature";
+import { createProductFeature } from "../../../../../feature/products.feature";
 
 type ProductsDialogBodyProps = {
   product?: productsType;
@@ -230,11 +230,13 @@ const ProductsDialogBody = ({
       if (!isValid) return;
       if(!selectedStore) return;
       const product = dispatch(
-        createProduct({
+        createProductFeature({
           data: data,
           stroeId: selectedStore.id ?? 0,
         }),
       );
+      toggle.onClose(); 
+      reset();
     } catch (e) {
       toast({
         title: "Error",
@@ -355,24 +357,24 @@ const ProductsDialogBody = ({
               />
             </div>
             <FormField
-                control={control}
-                name="brand"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Marca</FormLabel>
-                    <FormControl>
-                      <Input
-                        value={field.value}
-                        onChange={field.onChange}
-                        type="text"
-                        placeholder="Marca del producto"
-                        className="min-w-56 border"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              control={control}
+              name="brand"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marca</FormLabel>
+                  <FormControl>
+                    <Input
+                      value={field.value}
+                      onChange={field.onChange}
+                      type="text"
+                      placeholder="Marca del producto"
+                      className="min-w-56 border"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <div className="flex grow flex-row gap-2">
               <FormField
                 control={control}
@@ -636,7 +638,20 @@ const ProductsDialogBody = ({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit">Crear producto</Button>
+            <Button type="submit"
+              className="hover:text-whte mt-2 flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
+              disabled={loadingCreateProduct as boolean}>
+              {product ? "Editar producto" : "Crear producto"}
+              {loadingCreateProduct ? (
+                <div className="animate-spin">
+                  <Icon
+                    remixIconClass="ri-loader-4-line"
+                    color="white"
+                    size="xl"
+                  />
+                </div>
+              ) : null}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
