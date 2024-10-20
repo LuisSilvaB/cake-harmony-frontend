@@ -37,7 +37,7 @@ const Navbar = () => {
                 Contacto
               </li>
               <li className="flex w-full items-start gap-2">
-                <Link href={"/auth/login"} className="flex items-center">
+                <Link href={"/auth/login"} prefetch = {true} className="flex items-center">
                   <Button
                     variant="default"
                     size="xs"

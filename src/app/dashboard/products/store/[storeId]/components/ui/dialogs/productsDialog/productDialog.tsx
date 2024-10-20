@@ -1,6 +1,6 @@
 import React from "react";
 import ProductsDialogBody from "@/app/dashboard/products/store/[storeId]/components/ui/dialogs/productsDialog/productDialogBody/productDialogBody";
-import { productsType } from "@/app/dashboard/globalProducts/types/globalProducts.type";
+import { productsType } from "@/app/dashboard/products/store/[storeId]/types/products.type";
 import { ProductSchema, ProductSchemaType } from "@/app/dashboard/products/store/[storeId]/schema/product.schema";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialo
     image_url: [],
     images_files: [],
     MAIN_TAG: [], 
-    TAGS: [],
+    CHILD_TAGS: [],
     VARIANTS: [],
   }
 

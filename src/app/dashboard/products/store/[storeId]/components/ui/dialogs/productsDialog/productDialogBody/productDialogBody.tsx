@@ -1,4 +1,4 @@
-import { productsType } from "@/app/dashboard/globalProducts/types/globalProducts.type";
+import { ProductFilesType, productsType } from "@/app/dashboard/products/store/[storeId]/types/products.type";
 import { ProductSchemaType } from "@/app/dashboard/products/store/[storeId]/schema/product.schema";
 import { TagsType } from "@/app/dashboard/tags/types/tags.type";
 import { Button, Input, Label } from "@/components/ui";
@@ -33,11 +33,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import useToggle from "@/hooks/useToggle.hook";
-import { Car, Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { FieldErrors, SubmitHandler, useFormContext } from "react-hook-form";
 import { variantsType } from "../../../../../types/products.type";
-import { uploadFile } from "@/libs/supabase/s3";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "@/hooks/useToast";
@@ -102,12 +101,12 @@ const ProductsDialogBody = ({
         id_main_tag: selectedMainTag.id_main_tag,
       },
     ]);
-    setValue("TAGS", []);
+    setValue("CHILD_TAGS", []);
   };
 
   const onDeleteMainTag = () => {
-    setValue("MAIN_TAG", []);
-    setValue("TAGS", []);
+    setValue("CHILD_TAGS", []);
+    setValue("CHILD_TAGS", []);
     setChildrenTagsOptions([]);
   };
 
@@ -115,7 +114,7 @@ const ProductsDialogBody = ({
     const selectedTag = childrenTags.find(
       (tag: TagsType) => tag.name.toLowerCase() === value,
     );
-    const tags = getValues("TAGS");
+    const tags = getValues("CHILD_TAGS");
 
     if (!selectedTag) return;
     const tagExists = tags.some((tag: any) => tag.id === selectedTag.id);
@@ -132,14 +131,14 @@ const ProductsDialogBody = ({
         },
       ];
 
-      setValue("TAGS", updatedTags);
+      setValue("CHILD_TAGS", updatedTags);
     }
   };
 
   const onDeleteTag = (idTag: number) => {
-    const tags = getValues("TAGS");
+    const tags = getValues("CHILD_TAGS");
     setValue(
-      "TAGS",
+      "CHILD_TAGS",
       tags.filter((tag: any) => tag.id !== idTag),
     );
   };
@@ -258,13 +257,13 @@ const ProductsDialogBody = ({
   };
 
   const onCloseDialog = () => {
-    reset();
+    !product && reset();
     toggle.onClose();
   };
 
   useEffect(() => {
     if (!getValues("MAIN_TAG").length) {
-      setValue("TAGS", []);
+      setValue("CHILD_TAGS", []);
     } else {
       const childrenTagsByMainTag = childrenTags.filter(
         (tag: TagsType) => tag.id_main_tag === getValues("MAIN_TAG")[0]?.id,
@@ -279,6 +278,21 @@ const ProductsDialogBody = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watch("MAIN_TAG")[0]]);
 
+  
+  useEffect(()=>{
+    if(!product) return
+    setValue("id", product.id)
+    setValue("name", product.name)
+    setValue("description", product.description)
+    setValue("brand", product.brand)
+    setValue("MAIN_TAG", product.PRODUCTS_TAGS.filter((tag: any) => !tag.id_main_tag))
+    setValue("CHILD_TAGS", product.PRODUCTS_TAGS.filter((tag: any) => tag.id_main_tag))
+    setValue("VARIANTS", product.PRODUCT_VARIANTS)
+    setValue("PRODUCT_FILES", product.PRODUCT_FILES)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[product])
+
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onCloseDialog}>
       {product ? (
@@ -287,12 +301,13 @@ const ProductsDialogBody = ({
           onClick={toggle.onOpen}
           size={"xs"}
           variant="secondary"
-          className="items-center justify-center rounded-lg"
+          className="items-center justify-center rounded-lg cursor-pointer"
         >
           <Icon remixIconClass="ri-pencil-line" size="md" color="gray" />
         </Button>
       ) : (
         <Button
+          asChild
           onClick={toggle.onOpen}
           size={"sm"}
           className="items-center justify-center rounded-lg bg-atomic-tangerine-500 hover:bg-atomic-tangerine-600"
@@ -378,7 +393,7 @@ const ProductsDialogBody = ({
             <div className="flex grow flex-row gap-2">
               <FormField
                 control={control}
-                name="TAGS"
+                name="CHILD_TAGS"
                 render={({ field }) => {
                   return (
                     <FormItem className="mt-3 flex-1">
@@ -455,7 +470,7 @@ const ProductsDialogBody = ({
               />
               <FormField
                 control={control}
-                name="TAGS"
+                name="CHILD_TAGS"
                 render={({ field }) => {
                   return (
                     <FormItem className="mt-3 flex-1">
@@ -501,28 +516,30 @@ const ProductsDialogBody = ({
                           </PopoverContent>
                         </Popover>
                       </FormControl>
-                      {getValues("TAGS").length
-                        ? getValues("TAGS").map((tag: any, index: number) => (
-                            <Badge
-                              key={index}
-                              style={{
-                                backgroundColor: tag.color,
-                              }}
-                              className="flex w-fit flex-row gap-2"
-                            >
-                              <span>{tag.name}</span>
-                              <div
-                                onClick={() => onDeleteTag(tag.id)}
-                                className="hover:bg-light-gray cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200 hover:text-black"
+                      {getValues("CHILD_TAGS").length
+                        ? getValues("CHILD_TAGS").map(
+                            (tag: any, index: number) => (
+                              <Badge
+                                key={index}
+                                style={{
+                                  backgroundColor: tag.color,
+                                }}
+                                className="flex w-fit flex-row gap-2"
                               >
-                                <Icon
-                                  remixIconClass="ri-close-line"
-                                  size="xs"
-                                  color="white"
-                                />
-                              </div>
-                            </Badge>
-                          ))
+                                <span>{tag.name}</span>
+                                <div
+                                  onClick={() => onDeleteTag(tag.id)}
+                                  className="hover:bg-light-gray cursor-pointer rounded-lg px-1 transition-all ease-in-out hover:bg-gray-200 hover:text-black"
+                                >
+                                  <Icon
+                                    remixIconClass="ri-close-line"
+                                    size="xs"
+                                    color="white"
+                                  />
+                                </div>
+                              </Badge>
+                            ),
+                          )
                         : null}
                     </FormItem>
                   );
@@ -587,6 +604,49 @@ const ProductsDialogBody = ({
               }}
             />
 
+            {watch("PRODUCT_FILES") && watch("PRODUCT_FILES")?.length ? (
+              <div className="mt-2 flex flex-row flex-wrap gap-2 rounded-lg">
+                <Label>Imagenes ya registradas</Label>
+                <div className="flex w-full flex-row items-start justify-start gap-4">
+                  {watch("PRODUCT_FILES")?.map(
+                    (productFile: ProductFilesType, index: number) => (
+                      <div key={index} className="relative">
+                        <div
+                          onClick={() => onDeleteImage(index)}
+                          className="absolute -right-2 -top-2 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100"
+                        >
+                          <Icon
+                            remixIconClass="ri-close-circle-fill"
+                            color="red"
+                            className="hover:text-red-900"
+                          />
+                        </div>
+                        <div className="absolute -top-2 right-6 cursor-pointer rounded-full border bg-white px-1 opacity-70 transition-all ease-in-out hover:opacity-100">
+                          <Icon
+                            remixIconClass="ri-eye-fill"
+                            color="blue"
+                            className="hover:text-red-900"
+                          />
+                        </div>
+                        <img
+                          className="max-w-30 h-20 rounded-lg border shadow-xl"
+                          alt="product img"
+                          src={
+                            process.env.NEXT_PUBLIC_SUPABASE_URL! +
+                            process.env.NEXT_PUBLIC_SUPABASE_BUCKET_ROUTE! +
+                            "/stores/" +
+                            selectedStore?.id +
+                            "/products/" +
+                            productFile.file_name
+                          }
+                        />
+                      </div>
+                    ),
+                  )}
+                </div>
+              </div>
+            ) : null}
+
             <FormField
               control={control}
               name="images_files"
@@ -638,9 +698,11 @@ const ProductsDialogBody = ({
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit"
+            <Button
+              type="submit"
               className="hover:text-whte mt-2 flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
-              disabled={loadingCreateProduct as boolean}>
+              disabled={loadingCreateProduct as boolean}
+            >
               {product ? "Editar producto" : "Crear producto"}
               {loadingCreateProduct ? (
                 <div className="animate-spin">

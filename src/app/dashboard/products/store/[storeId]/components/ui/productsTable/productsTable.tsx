@@ -12,11 +12,12 @@ import { TagsType } from '@/app/dashboard/tags/types/tags.type';
 import { StoreType } from '@/app/dashboard/store/types/store.type';
 
 type productsTableProps = {
+  tags: TagsType[]
   products: productsType[]
   selectedStore: StoreType | null
 }
 
-const ProductsTable = ({ products, selectedStore }: productsTableProps) => {
+const ProductsTable = ({ products, selectedStore, tags }: productsTableProps) => {
   const [ selecteProductId, setSelectProductId ] = useState<string>("");
   const toggle = useToggle()
   const onSelectProduct = (productId: string) => {
@@ -124,10 +125,10 @@ const ProductsTable = ({ products, selectedStore }: productsTableProps) => {
         );
       },
     }),
-    // columnHelper.accessor("id", {
-    //   header: "Acciones",
-    //   // cell: (info) => <ProductDialog product={info.row.original} />,
-    // }),
+    columnHelper.accessor("id", {
+      header: "Acciones",
+      cell: (info) => <ProductDialog tags={tags} product={info.row.original} />,
+    }),
   ];
 
   const table = useReactTable({

@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createSupabaseBrowserClient } from "@/libs/supabase/browser-client";
 import { toast } from "@/hooks/useToast";
-import { debounce } from "lodash";
 import { productsType } from "../types/products.type";
 import { ProductSchemaType } from "../schema/product.schema";
 import { uploadFile } from "@/libs/supabase/s3";
@@ -10,7 +9,7 @@ import { uploadFile } from "@/libs/supabase/s3";
 const supabase = createSupabaseBrowserClient();
 
 export const getAllProductsByStoreIdFeature = createAsyncThunk(
-  "products/getAllProductsByStoreIdProducts",
+  "products/getAllProductsByStoreIdFeature",
   async ({ storeId }: { storeId: number }) => {
     const { data, error } = await supabase
       .from("PRODUCTS_STORE")
@@ -100,7 +99,7 @@ export const createProductFeature = createAsyncThunk(
       }))
   
       // ? Register products child tags 
-      const childTags = await Promise.all(data.TAGS.map( async (tag: any)=>{
+      const childTags = await Promise.all(data.CHILD_TAGS.map( async (tag: any)=>{
         const { data: ProductTagsData, error: ProductTagsError } =
           await supabase.from("PRODUCTS_TAGS").insert({
             PRODUCT_ID: ProductData[0].id,
@@ -150,7 +149,7 @@ export const createProductFeature = createAsyncThunk(
         description: ProductData[0].description,
         brand: ProductData[0].brand,
         image_url: ProductData[0].image_url,
-        PRODUCTS_TAGS: [...data.MAIN_TAG, ...data.TAGS],
+        PRODUCTS_TAGS: [...data.MAIN_TAG, ...data.CHILD_TAGS],
         PRODUCT_VARIANTS: productVariants,
         PRODUCT_FILES: productFiles,
       })
@@ -162,6 +161,130 @@ export const createProductFeature = createAsyncThunk(
     }
   }
 );
+
+export const updateProductFeature = createAsyncThunk("products/updateProductFeature", async(product:ProductSchemaType, {rejectWithValue, fulfillWithValue})=>{
+  
+  let mainTag:any[] = []
+  let childTags:any[] = []
+
+  //? Update PRODUCT
+  const {data: ProductData, error:ProductError } = await supabase.from("PRODUCT").update({
+    name: product.name, 
+    description: product.description,
+    brand: product.brand,  
+  }).eq("id", product.id).select()
+
+  //? Update PRODUCT_TAGS
+  const { data: ProductsTagsData, error: ProductsTagsError } = await supabase.from("PRODUCTS_TAGS").select("TAG_ID").eq("PRODUCT_ID", product.id); 
+  
+  if(ProductsTagsError || !ProductsTagsData) {
+    toast({title:"Error al encontrar tags", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+    return rejectWithValue(null)
+  }
+
+  // 1. Verify if the main tag exist on the product
+
+  const existTheSameMainTag = ProductsTagsData.find(tag => tag.TAG_ID === product.MAIN_TAG[0].id)
+  
+  if(!existTheSameMainTag) {
+    
+    // Delete all tags from product
+    
+    await supabase.from("PRODUCTS_TAGS").delete().eq("PRODUCT_ID", product.id)
+    
+    // Insert new main tags
+    mainTag = await Promise.all(product.MAIN_TAG.map( async (tag: any)=>{
+      const { data: ProductTagsData, error: ProductTagsError } = await supabase.from("PRODUCTS_TAGS").insert({
+        PRODUCT_ID: product.id,
+        TAG_ID: tag.id,
+        type: "CATEGORY"
+      }).select().single()
+  
+      return ProductTagsData
+      }))
+
+    // Insert new child tags
+    childTags = await Promise.all(product.CHILD_TAGS.map( async (tag: any)=>{
+      const { data: ProductTagsData, error: ProductTagsError } =
+        await supabase.from("PRODUCTS_TAGS").insert({
+          PRODUCT_ID: product.id,
+          TAG_ID: tag.id,
+          type: "SUB-CATEGORY",
+        }).select().single();  
+        
+        return ProductTagsData
+      }))
+
+    }
+
+    else {
+      // 2. Verify if there are child tags changes 
+
+      const {data: prevChildTags, error: prevChildTagsError} = await supabase.from("PRODUCTS_TAGS").select("TAG_ID").eq("PRODUCT_ID", product.id).eq("type", "SUB-CATEGORY");
+      
+      if(prevChildTagsError || !prevChildTags) {
+        toast({title:"Error al encontrar tags", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+        return rejectWithValue(null)
+      }
+      
+      const prevChildTagsIds = prevChildTags.map(tag => tag.TAG_ID)
+
+      const tagsToDelete = prevChildTagsIds.filter(tagId => !product.CHILD_TAGS.find(tag => tag.id === tagId))
+      const tagsToAdd = product.CHILD_TAGS.filter(tag => !prevChildTagsIds.find(tagId => tagId === tag.id))
+
+      // Delete all tags from product
+
+      await Promise.all(tagsToDelete.map(async (tagId: number)=>{
+        await supabase.from("PRODUCTS_TAGS").delete().eq("PRODUCT_ID", product.id).eq("type", "SUB-CATEGORY").eq("TAG_ID", tagId)
+      }))
+
+      // Insert new child tags
+      childTags = await Promise.all(tagsToAdd.map( async (tagId: any)=>{
+        const { data: ProductTagsData, error: ProductTagsError } =
+          await supabase.from("PRODUCTS_TAGS").insert({
+            PRODUCT_ID: product.id,
+            TAG_ID: tagId,
+            type: "SUB-CATEGORY",
+          }).select().single();  
+          
+          return ProductTagsData
+        }))
+    }
+    
+    // 3. verify if there are new variants to add or previus to delete  
+
+    const {data: prevVariants, error: prevVariantsError} = await supabase.from("PRODUCT_VARIANTS").select("id").eq("PRODUCT_ID", product.id);
+
+    if(prevVariantsError || !prevVariants) {
+      toast({title:"Error al encontrar tags", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+      return rejectWithValue(null)
+    }
+
+    const prevVariantIds = prevVariants.map(variant => variant.id)
+
+    const variantsToDelete = prevVariantIds.filter((variantId:number) => !product.VARIANTS.find(variant => variant.id === variantId))
+    const variantsToAdd = product.VARIANTS.filter((variant:any) => variant.id === 0)
+
+    // Delete variants from product
+
+    await Promise.all(variantsToDelete.map(async (variantId: number)=>{
+      await supabase.from("PRODUCT_VARIANTS").delete().eq("PRODUCT_ID", product.id).eq("id", variantId)
+    }))
+
+    // Insert new variants
+    const productVariants = await Promise.all(variantsToAdd.map( async (variant: any)=>{
+      const { data: ProductVariantsData, error: ProductVariantsError } = await supabase.from("PRODUCT_VARIANTS").insert({
+        PRODUCT_ID: product.id,
+        presentation: variant.presentation,
+      }).select().single()  
+  
+      return ProductVariantsData
+    }))
+  
+
+
+})
+
 
 export const getProductBySubsidiaryId = createAsyncThunk(
   "products/getProductBySubsidiaryId",

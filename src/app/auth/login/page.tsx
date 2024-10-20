@@ -1,26 +1,15 @@
-'use client' 
-import React from 'react'
+"use client";
+
 import { FcGoogle } from "react-icons/fc";
-import {
-  gabarito
-} from "@/fonts"
-import cx from '@/utils/cx';
+import { gabarito } from "@/fonts"
 import { Button, Input, Label } from '@/components/ui';
 import { useAuth } from '@/hooks/useAuth.hook';
+import cx from '@/utils/cx';
 import Link from 'next/link';
-import { createSupabaseBrowserClient } from '@/libs/supabase/browser-client';
 
 const Login = () => {
   
   const { handleGoogleLogin } = useAuth();
-  const supabase = createSupabaseBrowserClient();
-  
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${origin}/auth/verify` },
-    });
-  }
   
   return (
     <div className="flex w-full flex-1 flex-col justify-center border md:flex-row">
@@ -48,7 +37,7 @@ const Login = () => {
           </Button>
 
           <Button
-            onClick={handleLogin}
+            onClick={handleGoogleLogin}
             className="mt-[10px] w-full gap-2 border bg-white text-black hover:bg-white hover:text-black hover:shadow-lg"
           >
             <FcGoogle className="text-2xl" />
