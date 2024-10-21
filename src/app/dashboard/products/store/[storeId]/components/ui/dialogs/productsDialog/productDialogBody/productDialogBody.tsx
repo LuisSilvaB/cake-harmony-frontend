@@ -40,7 +40,7 @@ import { variantsType } from "../../../../../types/products.type";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/redux/store";
 import { toast } from "@/hooks/useToast";
-import { createProductFeature } from "../../../../../feature/products.feature";
+import { createProductFeature, updateProductFeature } from "../../../../../feature/products.feature";
 
 type ProductsDialogBodyProps = {
   product?: productsType;
@@ -106,7 +106,6 @@ const ProductsDialogBody = ({
 
   const onDeleteMainTag = () => {
     setValue("CHILD_TAGS", []);
-    setValue("CHILD_TAGS", []);
     setChildrenTagsOptions([]);
   };
 
@@ -156,7 +155,7 @@ const ProductsDialogBody = ({
       {
         id: 0,
         created_at: "",
-        PRODUCT_ID: 0,
+        PRODUCT_ID: "",
         presentation: "",
       },
     ]);
@@ -221,6 +220,8 @@ const ProductsDialogBody = ({
     }
   };
 
+  console.log(watch("PRODUCT_FILES"))
+
   const onSubmitCreateProduct: SubmitHandler<Omit<ProductSchemaType, "id">> = async (
     data
   ) => {
@@ -244,6 +245,31 @@ const ProductsDialogBody = ({
       return;
     }
   };
+
+
+  console.log(product)
+
+  const onSubmitUpateProduct = async (data: Omit<ProductSchemaType, "created_at">) => {
+    try {
+      const isValid = await trigger();
+      if (!isValid) return;
+      if(!selectedStore) return;
+      const product = dispatch(
+        updateProductFeature({
+          product: data,
+          storeId: selectedStore.id ?? 0,
+        }),
+      );
+
+      console.log(product)
+      
+      toggle.onClose(); 
+      reset();
+
+    } catch(e){
+      console.log(e)
+    }
+  }
   const onError = (
     error: FieldErrors<Omit<ProductSchemaType, "id" | "created_at">>,
   ) => {
@@ -329,7 +355,7 @@ const ProductsDialogBody = ({
               : "Registre los datos correspondientes a tu Producto."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmitCreateProduct, onError)}>
+        <form onSubmit={product ? handleSubmit(onSubmitUpateProduct, onError) : handleSubmit(onSubmitCreateProduct, onError)}>
           <div className="max-h-[55vh] overflow-y-auto p-2">
             <div className="flex grow flex-row gap-2">
               <FormField

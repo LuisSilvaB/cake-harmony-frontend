@@ -15,7 +15,7 @@ interface ProductDialogProps {
 const ProductDialog = ({ product, tags = [], loadingTags = false }: ProductDialogProps) => {
   
   const defaultValues: ProductSchemaType = {
-    id: 0,
+    id: "",
     name: "",
     description: "",
     brand:"", 

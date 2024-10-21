@@ -3,7 +3,7 @@ const MAX_FILE_SIZE = 5000000;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
 
 const productSchema = z.object({
-  id: z.number(),
+  id: z.string().optional(),
   name: z.string().min(3, {
     message: "El nombre debe tener al menos 3 caracteres",
   }),
@@ -16,9 +16,9 @@ const productSchema = z.object({
   image_url: z.array(z.string()).optional(),
   PRODUCT_FILES: z.array(z.object({
     id: z.number(),
-    PRODUCT_ID: z.number(),
+    PRODUCT_ID: z.string(),
     created_at: z.string().optional(), 
-    path: z.string(),
+    path: z.string().nullable(),
     file_name: z.string(),
   })).optional(),
   MAIN_TAG: z
@@ -56,7 +56,7 @@ const productSchema = z.object({
       z.object({
         id: z.number(),
         created_at: z.string().optional(),
-        PRODUCT_ID: z.number().optional(),
+        PRODUCT_ID: z.string().optional(),
         presentation: z.string().optional(),
         unid: z.number().optional(),
       }),

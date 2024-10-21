@@ -41,21 +41,21 @@ export type productsTagsType = {
 export type variantsType = {
   id: number;
   created_at?: string;
-  PRODUCT_ID?: number;
+  PRODUCT_ID?: string;
   presentation?: string;
 }
 
 export type ProductFilesType = { 
   id:number; 
-  PRODUCT_ID: number;
-  path: string;
+  PRODUCT_ID: string;
+  path: string | null;
   file_name: string;
   created_at?: string;
 }
 
 
 export type productsType = {
-  id: number;
+  id: string;
   name: string;
   description: string;
   brand: string;

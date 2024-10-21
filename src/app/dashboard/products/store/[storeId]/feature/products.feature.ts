@@ -4,7 +4,7 @@ import { createSupabaseBrowserClient } from "@/libs/supabase/browser-client";
 import { toast } from "@/hooks/useToast";
 import { productsType } from "../types/products.type";
 import { ProductSchemaType } from "../schema/product.schema";
-import { uploadFile } from "@/libs/supabase/s3";
+import { deleteFile, uploadFile } from "@/libs/supabase/s3";
 
 const supabase = createSupabaseBrowserClient();
 
@@ -129,7 +129,7 @@ export const createProductFeature = createAsyncThunk(
         }).select().single()  
         
         try {
-          uploadFile(file, `/stores/${stroeId}/products/${file.name}`);
+          uploadFile(file, `/stores/${stroeId}/products/${ProductFilesData.id}/files/${file.name}`);
         } catch (error) {
           toast({
             title: "Error al crear productos",
@@ -154,16 +154,21 @@ export const createProductFeature = createAsyncThunk(
         PRODUCT_FILES: productFiles,
       })
 
-
-
     }catch(error){
       toast({title:"Error al crear productos", description:"Los datos del producto no fueron registrados", variant:"destructive"})
     }
   }
 );
 
-export const updateProductFeature = createAsyncThunk("products/updateProductFeature", async(product:ProductSchemaType, {rejectWithValue, fulfillWithValue})=>{
+export const updateProductFeature = createAsyncThunk("products/updateProductFeature", async({
+  product, 
+  storeId
+}:{
+  product:ProductSchemaType,
+  storeId:number
+},{rejectWithValue, fulfillWithValue})=>{
   
+  let productFiles:any[] = []
   let mainTag:any[] = []
   let childTags:any[] = []
 
@@ -173,6 +178,11 @@ export const updateProductFeature = createAsyncThunk("products/updateProductFeat
     description: product.description,
     brand: product.brand,  
   }).eq("id", product.id).select()
+
+  if(ProductError || !ProductData) {
+    toast({title:"Error al crear productos", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+    return rejectWithValue(null)
+  }
 
   //? Update PRODUCT_TAGS
   const { data: ProductsTagsData, error: ProductsTagsError } = await supabase.from("PRODUCTS_TAGS").select("TAG_ID").eq("PRODUCT_ID", product.id); 
@@ -280,8 +290,73 @@ export const updateProductFeature = createAsyncThunk("products/updateProductFeat
   
       return ProductVariantsData
     }))
-  
 
+    // 4. Verify if there are new files to add or previus files to delete
+
+    const {data: prevFiles, error: prevFilesError} = await supabase.from("PRODUCT_FILES").select("id").eq("PRODUCT_ID", product.id);
+
+    if(prevFilesError || !prevFiles) {
+      toast({title:"Error al encontrar tags", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+      return rejectWithValue(null)
+    }
+
+    const prevFileIds = prevFiles.map(file => file.id)
+    
+    const filesToDelete = prevFileIds.filter((fileId: number) => !product.PRODUCT_FILES?.find((file: any) => file.id === fileId))
+    
+    // - Delete files from DB
+
+    if(filesToDelete.length){
+      await Promise.all(filesToDelete.map(async (fileId: number)=>{
+        
+        await supabase.from("PRODUCT_FILES").delete().eq("PRODUCT_ID", product.id).eq("id", fileId)
+        
+        await deleteFile([`/stores/${storeId}/products/${product.id}/files/${fileId}`])
+      }))
+    }
+
+    // - Verify if there are new files to add
+
+      // ? Register products files
+    if(product.images_files?.length){
+      productFiles = await Promise.all(product.images_files.map( async (file: any)=>{
+        const { data: ProductFilesData, error: ProductFilesError } = await supabase.from("PRODUCT_FILES").insert({
+          PRODUCT_ID: product.id,
+          path: file.path,
+          file_name: file.name,
+        }).select().single()  
+        
+        if(ProductFilesError || !ProductFilesData) {
+          toast({title:"Error al crear productos", description:"Los datos del producto no fueron registrados", variant:"destructive"})
+          return rejectWithValue(null)
+        }
+        
+        try {
+          uploadFile(file, `/stores/${storeId}/products/${ProductFilesData.id}/files/${file.name}`);
+        } catch (error) {
+          toast({
+            title: "Error al crear productos",
+            description: "Este archivo ya existe en la base de datos",
+            variant: "destructive",
+          });
+        }
+        
+        return ProductFilesData
+      }))
+    }
+
+  // ! Return product data 
+
+    return fulfillWithValue({
+      id: product.id, 
+      name: product.name, 
+      description: product.description,
+      brand: product.brand,  
+      image_url: product.image_url,
+      PRODUCTS_TAGS: [...product.MAIN_TAG, ...product.CHILD_TAGS],
+      PRODUCT_VARIANTS: productVariants,
+      PRODUCT_FILES: product.PRODUCT_FILES?.length ?  [...productFiles, ...product.PRODUCT_FILES] : productFiles,
+    })
 
 })
 
