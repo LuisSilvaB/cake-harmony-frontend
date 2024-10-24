@@ -114,6 +114,8 @@ const ProductsTable = ({ products, selectedStore, tags }: productsTableProps) =>
                       "/stores/" +
                       selectedStore?.id +
                       "/products/" +
+                      productFile.PRODUCT_ID +
+                      "/files/" +
                       productFile.file_name
                     }
                     alt="product img"

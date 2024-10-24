@@ -59,10 +59,10 @@ const ProductsDialogBody = ({
       label: string;
     }>
   >([]);
-  const toggle = useToggle();
+  const toggle = useToggle(false);
   const dispatch = useDispatch<AppDispatch>();
   const { selectedStore } = useSelector((state: RootState) => state.store);
-  const { loadingCreateProduct } = useSelector((state: RootState) => state.products);
+  const { loadingCreateProduct, loadingUpdateProduct } = useSelector((state: RootState) => state.products);
   const {
     control,
     handleSubmit,
@@ -220,8 +220,6 @@ const ProductsDialogBody = ({
     }
   };
 
-  console.log(watch("PRODUCT_FILES"))
-
   const onSubmitCreateProduct: SubmitHandler<Omit<ProductSchemaType, "id">> = async (
     data
   ) => {
@@ -229,7 +227,7 @@ const ProductsDialogBody = ({
       const isValid = await trigger();
       if (!isValid) return;
       if(!selectedStore) return;
-      const product = dispatch(
+      const product = await dispatch(
         createProductFeature({
           data: data,
           stroeId: selectedStore.id ?? 0,
@@ -246,25 +244,34 @@ const ProductsDialogBody = ({
     }
   };
 
-
-  console.log(product)
-
   const onSubmitUpateProduct = async (data: Omit<ProductSchemaType, "created_at">) => {
     try {
       const isValid = await trigger();
       if (!isValid) return;
       if(!selectedStore) return;
-      const product = dispatch(
+      const product = await dispatch(
         updateProductFeature({
           product: data,
           storeId: selectedStore.id ?? 0,
         }),
       );
 
-      console.log(product)
-      
-      toggle.onClose(); 
-      reset();
+      if (product.payload && !loadingUpdateProduct) {
+        // toggle.onClose();
+        // reset();
+        console.log(product.payload)
+        return toast({
+          title: "Producto actualizado",
+          description: "El producto se actualizó correctamente",
+          variant: "default",
+        });
+      } else {
+        return toast({
+          title: "Error al crear productos",
+          description: "Los datos del producto no fueron registrados",
+          variant: "destructive",
+        });
+      }
 
     } catch(e){
       console.log(e)
@@ -283,9 +290,9 @@ const ProductsDialogBody = ({
   };
 
   const onCloseDialog = () => {
-    !product && reset();
     toggle.onClose();
   };
+  console.log(product)
 
   useEffect(() => {
     if (!getValues("MAIN_TAG").length) {
@@ -317,7 +324,7 @@ const ProductsDialogBody = ({
     setValue("PRODUCT_FILES", product.PRODUCT_FILES)
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[product])
+  },[product, toggle.isOpen])
 
   return (
     <Dialog open={toggle.isOpen} onOpenChange={onCloseDialog}>
@@ -663,6 +670,8 @@ const ProductsDialogBody = ({
                             "/stores/" +
                             selectedStore?.id +
                             "/products/" +
+                            productFile.PRODUCT_ID +
+                            "/files/" +
                             productFile.file_name
                           }
                         />
@@ -727,10 +736,10 @@ const ProductsDialogBody = ({
             <Button
               type="submit"
               className="hover:text-whte mt-2 flex gap-2 border-atomic-tangerine-100 bg-atomic-tangerine-500 text-xs hover:bg-atomic-tangerine-600 hover:shadow-md"
-              disabled={loadingCreateProduct as boolean}
+              disabled={loadingCreateProduct || loadingUpdateProduct}
             >
               {product ? "Editar producto" : "Crear producto"}
-              {loadingCreateProduct ? (
+              {loadingCreateProduct || loadingUpdateProduct ? (
                 <div className="animate-spin">
                   <Icon
                     remixIconClass="ri-loader-4-line"

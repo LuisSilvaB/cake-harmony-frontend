@@ -126,10 +126,10 @@ export const createProductFeature = createAsyncThunk(
           PRODUCT_ID: ProductData[0].id,
           path: file.path,
           file_name: file.name,
-        }).select().single()  
+        }).select("*").single()  
         
         try {
-          uploadFile(file, `/stores/${stroeId}/products/${ProductFilesData.id}/files/${file.name}`);
+          uploadFile(file, `/stores/${stroeId}/products/${ProductFilesData.PRODUCT_ID}/files/${file.name}`);
         } catch (error) {
           toast({
             title: "Error al crear productos",
@@ -143,6 +143,7 @@ export const createProductFeature = createAsyncThunk(
 
       //! Get product Data 
 
+      console.log("Product variants", productVariants)
       return fulfillWithValue({
         id: ProductData[0].id,
         name: ProductData[0].name,
@@ -286,7 +287,7 @@ export const updateProductFeature = createAsyncThunk("products/updateProductFeat
       const { data: ProductVariantsData, error: ProductVariantsError } = await supabase.from("PRODUCT_VARIANTS").insert({
         PRODUCT_ID: product.id,
         presentation: variant.presentation,
-      }).select().single()  
+      }).select("*").single()
   
       return ProductVariantsData
     }))
@@ -354,7 +355,7 @@ export const updateProductFeature = createAsyncThunk("products/updateProductFeat
       brand: product.brand,  
       image_url: product.image_url,
       PRODUCTS_TAGS: [...product.MAIN_TAG, ...product.CHILD_TAGS],
-      PRODUCT_VARIANTS: productVariants,
+      PRODUCT_VARIANTS: [...product.VARIANTS.filter((variant: any) => variant.id), ...productVariants],
       PRODUCT_FILES: product.PRODUCT_FILES?.length ?  [...productFiles, ...product.PRODUCT_FILES] : productFiles,
     })
 
@@ -450,6 +451,7 @@ const productsSlice = createSlice({
     loadingProduct: false as boolean,
     selectedProduct: null as productsType | null,
     loadingCreateProduct: false as boolean,
+    loadingUpdateProduct: false as boolean, 
   },
   reducers: {
     setProductsProducts: (state, action) => {
@@ -517,6 +519,28 @@ const productsSlice = createSlice({
     });
     builder.addCase(createProductFeature.rejected, (state, action) => {
       state.loadingCreateProduct = false;
+    });
+    builder.addCase(updateProductFeature.pending, (state, action) => {
+      state.loadingUpdateProduct = true;
+    });
+    builder.addCase(updateProductFeature.fulfilled, (state, action) => {
+      if(!action.payload) {
+        state.loadingUpdateProduct = false;
+        return
+      };
+      if(!action.payload) return 
+
+      console.log(action.payload)
+      state.products = state.products.map((product: any) => {
+        if(product.id === action.payload.id) {
+          return action.payload
+        }
+        return product
+      })
+      state.loadingUpdateProduct = false;
+    });
+    builder.addCase(updateProductFeature.rejected, (state, action) => {
+      state.loadingUpdateProduct = false;
     });
   },
 });
